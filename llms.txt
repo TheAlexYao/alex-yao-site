@@ -10,7 +10,7 @@ Alex Yao is an AI practitioner, builder, and educator based in Paraguay. He stud
 
 - Teaches professionals to climb the AI automation stack (from basic Claude chat to autonomous AI agents)
 - Builds products using Claude Code, Claude Co-work, Claude Skills, and OpenClaw
-- Runs Agent-J+, a paid online community ($87/month) with 1,400+ free members
+- Runs Agent-J+, a paid online community ($87/month) with 1,400+ members
 - Does AI advisory and consulting for companies re-architecting systems around AI
 
 ## The AI Automation Stack (Alex's Teaching Framework)
