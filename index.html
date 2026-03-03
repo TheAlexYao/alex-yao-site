@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alex Yao</title>
+  <meta name="description" content="Helping professionals go from chatting with Claude by Anthropic to building agents that run their business and apps.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F6F1EB;
+      --bg-warm: #EDE7DF;
+      --bg-card: #FDFBF8;
+      --text: #2D2926;
+      --text-secondary: #6B6560;
+      --text-tertiary: #9C9590;
+      --accent: #C2791D;
+      --accent-hover: #A8671A;
+      --accent-light: #F0DCC4;
+      --border: #DDD6CD;
+      --serif: 'Instrument Serif', 'Georgia', serif;
+      --sans: 'Inter', -apple-system, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      font-size: 18px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    ::selection {
+      background: var(--accent-light);
+      color: var(--text);
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    a:hover { color: var(--accent-hover); }
+
+    /* ─── NAV ─── */
+    nav {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 2rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-name {
+      font-family: var(--serif);
+      font-size: 1.4rem;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ─── HERO ─── */
+    .hero {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 4rem 2rem 0;
+    }
+
+    .hero-image {
+      width: 100%;
+      height: 420px;
+      object-fit: cover;
+      object-position: center 30%;
+      border-radius: 4px;
+      margin-bottom: 3rem;
+    }
+
+    .hero-content {
+      max-width: 100%;
+    }
+
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: 3.2rem;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+      font-weight: 400;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 680px;
+    }
+
+    /* ─── DIVIDER ─── */
+    .divider {
+      max-width: 1100px;
+      margin: 4rem auto;
+      padding: 0 2rem;
+    }
+
+    .divider hr {
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ─── SECTION HEADERS ─── */
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 1.5rem;
+    }
+
+    /* ─── ABOUT ─── */
+    .about {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 4rem;
+    }
+
+    .about-text {
+      max-width: 640px;
+    }
+
+    .about-text p {
+      margin-bottom: 1.2rem;
+      line-height: 1.75;
+    }
+
+    .about-text p:last-child { margin-bottom: 0; }
+
+    .about-text .highlight {
+      font-family: var(--serif);
+      font-size: 1.4rem;
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+    }
+
+    /* ─── DESK / PROJECTS ─── */
+    .desk {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .desk-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .desk-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .desk-card:hover {
+      border-color: var(--accent-light);
+      box-shadow: 0 2px 12px rgba(45, 41, 38, 0.06);
+    }
+
+    .desk-card .card-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+
+    .desk-card h3 {
+      font-family: var(--serif);
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.01em;
+    }
+
+    .desk-card p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    .desk-card .card-link {
+      display: inline-block;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .desk-card.featured {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+      background: var(--bg-warm);
+      border-color: transparent;
+    }
+
+    .desk-card.featured .card-content { }
+
+    .desk-card.featured .card-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-number {
+      font-family: var(--serif);
+      font-size: 2.5rem;
+      line-height: 1;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+    }
+
+    /* ─── NOTEBOOK ─── */
+    .notebook {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .notebook-list {
+      list-style: none;
+    }
+
+    .notebook-item {
+      padding: 1.5rem 0;
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 2rem;
+      align-items: baseline;
+    }
+
+    .notebook-item:first-child {
+      padding-top: 0;
+    }
+
+    .notebook-date {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .notebook-title {
+      font-family: var(--serif);
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: var(--text);
+      transition: color 0.2s;
+    }
+
+    .notebook-title:hover {
+      color: var(--accent);
+    }
+
+    .notebook-excerpt {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin-top: 0.35rem;
+      line-height: 1.6;
+    }
+
+    /* ─── TWO DOORS ─── */
+    .doors {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .door {
+      padding: 3rem;
+      border-radius: 4px;
+    }
+
+    .door-learn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+    }
+
+    .door-hire {
+      background: var(--text);
+      color: var(--bg);
+    }
+
+    .door h2 {
+      font-family: var(--serif);
+      font-size: 2rem;
+      font-weight: 400;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.01em;
+    }
+
+    .door p {
+      font-size: 0.92rem;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+
+    .door-learn p { color: var(--text-secondary); }
+    .door-hire p { color: #B8B2AC; }
+
+    .door-hire a { color: var(--accent-light); }
+    .door-hire a:hover { color: #fff; }
+
+    .door .stack-list {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1.25rem 0;
+    }
+
+    .stack-list li {
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 0.3rem 0.75rem;
+      border-radius: 100px;
+      letter-spacing: 0.02em;
+    }
+
+    .door-learn .stack-list li {
+      background: var(--accent-light);
+      color: var(--accent-hover);
+    }
+
+    .door-hire .stack-list li {
+      background: rgba(255,255,255,0.1);
+      color: #B8B2AC;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.7rem 1.8rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-radius: 4px;
+      transition: all 0.2s;
+      letter-spacing: 0.01em;
+    }
+
+    .cta-btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .cta-btn-primary:hover {
+      background: var(--accent-hover);
+      color: #fff;
+    }
+
+    .cta-btn-outline {
+      border: 1px solid rgba(255,255,255,0.3);
+      color: var(--bg);
+    }
+    .cta-btn-outline:hover {
+      border-color: rgba(255,255,255,0.6);
+      color: #fff;
+    }
+
+    /* ─── QUICK VERSION ─── */
+    .quick {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 4rem;
+    }
+
+    .quick-text {
+      max-width: 640px;
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: var(--text-secondary);
+    }
+
+    .quick-text p { margin-bottom: 1rem; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 2rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+    }
+    .footer-links a:hover { color: var(--text); }
+
+    .footer-copy {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      html { font-size: 16px; }
+
+      nav { padding: 1.5rem 1.25rem 0; }
+
+      .nav-links { gap: 1.25rem; }
+
+      .hero {
+        padding: 2.5rem 1.25rem 0;
+      }
+
+      .hero-image { height: 220px; }
+
+      .hero h1 { font-size: 2.2rem; }
+
+      .about,
+      .quick {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0 1.25rem;
+      }
+
+      .desk { padding: 0 1.25rem; }
+
+      .desk-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .desk-card.featured {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      .notebook { padding: 0 1.25rem; }
+
+      .notebook-item {
+        grid-template-columns: 1fr;
+        gap: 0.25rem;
+      }
+
+      .doors {
+        grid-template-columns: 1fr;
+        padding: 0 1.25rem;
+      }
+
+      .door { padding: 2rem; }
+
+      .divider { padding: 0 1.25rem; margin: 3rem auto; }
+
+      footer {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 2rem 1.25rem 3rem;
+      }
+    }
+
+    /* ─── SUBTLE ANIMATIONS ─── */
+    @media (prefers-reduced-motion: no-preference) {
+      .desk-card,
+      .notebook-title {
+        transition: all 0.25s ease;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="/" class="nav-name">Alex Yao</a>
+    <ul class="nav-links">
+      <li><a href="#desk">Building</a></li>
+      <li><a href="#notebook">Notebook</a></li>
+      <li><a href="#work-with-me">Work with me</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <img src="hero-curtain.png" alt="A hand pulling back a curtain to reveal constellations and celestial machinery, vintage crosshatch engraving" class="hero-image">
+    <div class="hero-content">
+      <h1>Most people are stuck at chatting with AI.<br><em>I teach what comes after.</em></h1>
+      <p class="hero-sub">I help professionals go from "I use ChatGPT sometimes" to building AI agents that write code, use tools, and run entire workflows on their behalf. The goal is getting AI to work like a teammate, not a search bar.</p>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- ABOUT -->
+  <section class="about">
+    <div>
+      <p class="section-label">About</p>
+    </div>
+    <div class="about-text">
+      <p class="highlight">I studied Cognitive Science at Berkeley &mdash; how human minds work. Now I teach humans how to work with AI minds.</p>
+      <p>I've been building companies and products since 2015, starting with no-code and automations. When ChatGPT came out, I moved into AI coding. When Anthropic released Claude Code, I was there day one. When OpenClaw was still called Clawdbot, I was already using it.</p>
+      <p>Right now I'm building multiple products with AI, writing curriculum with AI, and managing my life through a network of AI agents. Not a chatbot. Not an assistant. An AI coworker that builds for me, without touching a single line of code.</p>
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- WHAT'S ON THE DESK -->
+  <section class="desk" id="desk">
+    <p class="section-label">What's on the desk</p>
+    <div class="desk-grid">
+
+      <!-- FEATURED: Agent-J+ -->
+      <div class="desk-card featured">
+        <div class="card-content">
+          <div class="card-tag">Community</div>
+          <h3>Agent-J+</h3>
+          <p>An online community where you go from "interested in AI" to building production-ready systems in 12 weeks. No coding background needed. We build real things: custom apps in plain English, automated workflows, AI agents with memory and tools.</p>
+          <a href="https://www.skool.com/agent-j-plus" class="cta-btn cta-btn-primary">Join Agent-J+ &rarr;</a>
+        </div>
+        <div class="card-stats">
+          <div class="stat">
+            <span class="stat-number">1,400+</span>
+            <span class="stat-label">Free community members</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">12</span>
+            <span class="stat-label">Week structured curriculum</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">$87</span>
+            <span class="stat-label">Per month, cancel anytime</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Current Build -->
+      <div class="desk-card">
+        <div class="card-tag">Building</div>
+        <h3>Shipping with AI agents</h3>
+        <p>I use Claude Code, Claude Co-work, Claude Skills, and OpenClaw daily to build apps, write content, and manage projects. This is the stack I teach.</p>
+      </div>
+
+      <!-- Stealth -->
+      <div class="desk-card">
+        <div class="card-tag">Stealth</div>
+        <h3>ChillData</h3>
+        <p>Something new in the works. More soon.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- NOTEBOOK -->
+  <section class="notebook" id="notebook">
+    <p class="section-label">Notebook</p>
+    <ul class="notebook-list">
+      <li class="notebook-item">
+        <span class="notebook-date">Mar 2026</span>
+        <div>
+          <a href="#" class="notebook-title">I built a language learning RPG in one sitting with Figma Make</a>
+          <p class="notebook-excerpt">What happens when you drop an image into a no-code tool and just describe what you want. The game is called Wayword.</p>
+        </div>
+      </li>
+      <li class="notebook-item">
+        <span class="notebook-date">Feb 2026</span>
+        <div>
+          <a href="#" class="notebook-title">What I learned running 5 AI agents at once for a week</a>
+          <p class="notebook-excerpt">Calendar management, research, content drafting, project monitoring, and one that just surprises me. Here's what worked and what didn't.</p>
+        </div>
+      </li>
+      <li class="notebook-item">
+        <span class="notebook-date">Feb 2026</span>
+        <div>
+          <a href="#" class="notebook-title">Claude Code shipped a feature while I was on a call</a>
+          <p class="notebook-excerpt">The moment AI stopped being a tool and started being a coworker. This is what Level 4 automation actually looks like.</p>
+        </div>
+      </li>
+      <li class="notebook-item">
+        <span class="notebook-date">Jan 2026</span>
+        <div>
+          <a href="#" class="notebook-title">The AI Automation Stack: from chat to orchestration</a>
+          <p class="notebook-excerpt">Most people are at Level 1. Here's what Levels 2 through 5 look like, with real examples from my daily workflow.</p>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- TWO DOORS -->
+  <section class="doors" id="work-with-me">
+
+    <div class="door door-learn">
+      <p class="section-label">For professionals</p>
+      <h2>Learn with me</h2>
+      <p>You're experienced and smart. You know AI matters. Agent-J+ is where you go from chatting with Claude to building agents that handle real work. Live workshops every week.</p>
+      <ul class="stack-list">
+        <li>Claude Desktop</li>
+        <li>Claude Co-work</li>
+        <li>Claude Code</li>
+        <li>Claude Skills</li>
+        <li>OpenClaw</li>
+      </ul>
+      <p>The people showing up are ready to bring everything they already know into this new way of working.</p>
+      <a href="https://www.skool.com/agent-j" class="cta-btn cta-btn-primary">Join free community &rarr;</a>
+    </div>
+
+    <div class="door door-hire">
+      <p class="section-label" style="color: #7A756F;">For companies</p>
+      <h2>Hire me</h2>
+      <p>If you're running a company and need someone who understands AI at a systems level &mdash; not just the pitch deck version &mdash; I do advisory and consulting.</p>
+      <ul class="stack-list">
+        <li>AI strategy</li>
+        <li>Agent architecture</li>
+        <li>Legacy system integration</li>
+        <li>Team enablement</li>
+      </ul>
+      <p>I've worked with teams re-architecting legacy systems around AI, setting up agent orchestration, and helping executives separate signal from noise.</p>
+      <a href="mailto:alex@alexyao.me" class="cta-btn cta-btn-outline">Get in touch &rarr;</a>
+    </div>
+
+  </section>
+
+  <div class="divider"><hr></div>
+
+  <!-- QUICK VERSION -->
+  <section class="quick">
+    <div>
+      <p class="section-label">The quick version</p>
+    </div>
+    <div class="quick-text">
+      <p>Cognitive Science, UC Berkeley. Building companies and products since 2015. AI language learning app in Mexico City. AI community events with AI AMPED. Now: AI agents, curriculum, consulting.</p>
+      <p>My stack: Claude Desktop, Claude Co-work, Claude Code, Claude Skills, and OpenClaw for orchestrating agents that run autonomously. I teach professionals how to use all of it.</p>
+      <p>I don't talk about AI. I build with it. Every day.</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <ul class="footer-links">
+      <li><a href="https://linkedin.com/in/thealexyao">LinkedIn</a></li>
+      <li><a href="https://x.com/TheAlexYao">X / Twitter</a></li>
+      <li><a href="https://www.skool.com/agent-j">Agent-J Free</a></li>
+      <li><a href="https://www.skool.com/agent-j-plus">Agent-J+</a></li>
+      <li><a href="mailto:alex@alexyao.me">Email</a></li>
+    </ul>
+    <span class="footer-copy">&copy; 2026 Alex Yao</span>
+  </footer>
+
+</body>
+</html>
