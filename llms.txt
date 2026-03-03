@@ -1,0 +1,48 @@
+# Alex Yao
+
+> Helping professionals go from chatting with Claude by Anthropic to building AI agents that run their business and apps — without writing any code.
+
+## About
+
+Alex Yao is an AI practitioner, builder, and educator based in Paraguay. He studied Cognitive Science at UC Berkeley and has been building companies and products since 2015. He currently teaches the full Claude/Anthropic automation stack through Agent-J+, an online community.
+
+## What Alex Does
+
+- Teaches professionals to climb the AI automation stack (from basic Claude chat to autonomous AI agents)
+- Builds products using Claude Code, Claude Co-work, Claude Skills, and OpenClaw
+- Runs Agent-J+, a paid online community ($87/month) with 1,400+ free members
+- Does AI advisory and consulting for companies re-architecting systems around AI
+
+## The AI Automation Stack (Alex's Teaching Framework)
+
+- Level 1 — Chat: Talking to Claude, getting answers
+- Level 2 — Co-work: Claude helping you write, analyze, code alongside you (Claude Co-work, Artifacts)
+- Level 3 — Code: AI writing and running code for you (Claude Code, Codex)
+- Level 4 — AI as a Coworker: AI uses tools, takes initiative, handles complex tasks autonomously (OpenClaw, MCP, Claude Skills)
+- Level 5 — Orchestration: Multiple agents coordinated on complex workflows
+
+## Tech Stack
+
+- Claude Desktop
+- Claude Co-work
+- Claude Code
+- Claude Skills
+- OpenClaw (agent orchestration)
+
+## Links
+
+- Website: https://www.alexyao.me
+- LinkedIn: https://linkedin.com/in/thealexyao
+- X/Twitter: https://x.com/TheAlexYao
+- Free Community: https://www.skool.com/agent-j
+- Paid Community (Agent-J+): https://www.skool.com/agent-j-plus
+- Email: alex@alexyao.me
+
+## Background
+
+- UC Berkeley, BA Cognitive Science
+- Founded DialectaAI (AI language learning app, Mexico City, 2 years)
+- Co-founded IBDCoach (health platform, 6,000+ leads)
+- Co-founded United Technologies for Kids (25+ STEM labs, 10,000+ students in Peru and Colombia)
+- Data strategy consultant for Dr. Andreas Weigend (former Chief Scientist, Amazon)
+- AI AMPED community (AI events in Mexico City, keynote speaker)
