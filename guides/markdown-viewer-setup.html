@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Viewer Setup Guide - Alex Yao</title>
+  <meta name="description" content="Browse and edit your OpenClaw workspace files from any device. Tailscale + a tiny Python server.">
+  <meta name="author" content="Alex Yao">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="canonical" href="https://www.alexyao.me/guides/markdown-viewer-setup">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+           max-width: 720px; margin: 0 auto; padding: 2em 1.5em; color: #1a1a1a;
+           background: #fafaf9; line-height: 1.7; }
+    h1 { font-size: 2em; margin-bottom: 0.3em; letter-spacing: -0.02em; }
+    h2 { font-size: 1.4em; margin-top: 2.5em; margin-bottom: 0.5em; padding-bottom: 0.3em;
+         border-bottom: 1px solid #e5e5e5; }
+    h3 { font-size: 1.1em; margin-top: 1.5em; margin-bottom: 0.4em; }
+    p { margin-bottom: 1em; }
+    .subtitle { color: #666; font-size: 1.1em; margin-bottom: 2em; }
+    ul, ol { margin-bottom: 1em; padding-left: 1.5em; }
+    li { margin-bottom: 0.4em; }
+    pre { background: #1a1a1a; color: #e5e5e5; padding: 1.2em; border-radius: 8px;
+          overflow-x: auto; margin-bottom: 1.2em; font-size: 0.85em; line-height: 1.5; }
+    code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+    pre code { background: none; padding: 0; color: inherit; }
+    a { color: #0066cc; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 12px;
+             font-size: 0.8em; font-weight: 600; margin-right: 0.5em; }
+    .badge-agent { background: #e8f5e9; color: #2e7d32; }
+    .badge-human { background: #fff3e0; color: #e65100; }
+    .callout { background: #f5f5f0; border-left: 4px solid #1a1a1a; padding: 1em 1.2em;
+               margin: 1.5em 0; border-radius: 0 6px 6px 0; }
+    .callout-title { font-weight: 600; margin-bottom: 0.3em; }
+    .divider { border: none; border-top: 2px solid #1a1a1a; margin: 3em 0; }
+    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; margin: 1.5em 0; }
+    .feature-card { background: white; border: 1px solid #e5e5e5; border-radius: 8px; padding: 1em; }
+    .feature-card strong { display: block; margin-bottom: 0.3em; }
+    .back { display: inline-block; margin-bottom: 1.5em; color: #666; text-decoration: none; font-size: 0.9em; }
+    .back:hover { color: #1a1a1a; }
+    .copy-section { background: white; border: 2px solid #1a1a1a; border-radius: 12px;
+                    padding: 1.5em; margin: 1.5em 0; position: relative; }
+    .copy-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1em; }
+    .copy-btn { background: #1a1a1a; color: white; border: none; padding: 8px 16px;
+                border-radius: 6px; cursor: pointer; font-size: 0.85em; }
+    .copy-btn:hover { background: #333; }
+    table { width: 100%; border-collapse: collapse; margin: 1em 0; }
+    th, td { text-align: left; padding: 0.6em 1em; border-bottom: 1px solid #e5e5e5; }
+    th { font-weight: 600; background: #f5f5f0; }
+    .diagram { background: #1a1a1a; color: #e5e5e5; padding: 1.5em; border-radius: 8px;
+               font-family: monospace; font-size: 0.85em; line-height: 1.6; margin: 1.5em 0;
+               text-align: center; white-space: pre; }
+    @media (max-width: 600px) {
+      body { padding: 1.5em 1em; }
+      .feature-grid { grid-template-columns: 1fr; }
+      h1 { font-size: 1.6em; }
+    }
+  </style>
+</head>
+<body>
+  <a href="/" class="back">&larr; alexyao.me</a>
+  <h1>Markdown Viewer Setup</h1>
+  <p class="subtitle">Browse and edit your OpenClaw workspace from any device. No cloud, no port forwarding.</p>
+
+  <div class="feature-grid">
+    <div class="feature-card"><strong>📂 File Browser</strong>Navigate your whole workspace in a clean web UI</div>
+    <div class="feature-card"><strong>📝 Rendered Markdown</strong>Syntax highlighting, tables, table of contents</div>
+    <div class="feature-card"><strong>✏️ In-Browser Editing</strong>Edit and save files directly from your phone</div>
+    <div class="feature-card"><strong>🔄 Live Reload</strong>See when your AI edits a file, one tap to refresh</div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">What you need</div>
+    <p style="margin:0">A machine running OpenClaw (Mac Mini, VPS, etc.), Python 3, and Tailscale on all devices you want to access from.</p>
+  </div>
+
+  <hr class="divider">
+
+  <h2><span class="badge badge-agent">🤖 AGENT</span> Part 1: Send to Your OpenClaw</h2>
+  <p>Copy the prompt below and send it to your OpenClaw agent. It handles everything.</p>
+
+  <div class="copy-section">
+    <div class="copy-header">
+      <strong>Copy this entire prompt:</strong>
+      <button class="copy-btn" onclick="copyById('agent-prompt', this)">📋 Copy</button>
+    </div>
+    <pre><code id="agent-prompt">Set up a markdown workspace viewer for me. Do these steps:
+
+1. Run: pip3 install markdown
+
+2. Create ~/clawd/scripts/md-server.py with the script from
+   https://www.alexyao.me/guides/md-server.py
+   (or I can paste it if you can't fetch URLs)
+
+3. Find my Tailscale IP: tailscale ip -4
+
+4. Start it:
+   nohup python3 ~/clawd/scripts/md-server.py &gt; /tmp/md-viewer.log 2&gt;&amp;1 &amp;
+
+5. Make it persist across reboots:
+   - If this is Linux: create a systemd service for it
+   - If this is macOS: create a launchd plist for it
+
+6. Tell me the Tailscale IP and confirm it's running.</code></pre>
+  </div>
+
+  <h3>The Server Script</h3>
+  <p>Your agent should save this as <code>~/clawd/scripts/md-server.py</code>. Also available as a <a href="/guides/md-server.py">raw download</a>.</p>
+
+  <div class="copy-section">
+    <div class="copy-header">
+      <strong>md-server.py (~150 lines)</strong>
+      <button class="copy-btn" onclick="copyById('script-content', this)">📋 Copy</button>
+    </div>
+    <pre style="max-height: 500px; overflow-y: auto;"><code id="script-content">#!/usr/bin/env python3
+"""Lightweight markdown file browser with live-reload."""
+import os, hashlib
+from pathlib import Path
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+import markdown
+import urllib.parse
+
+ROOT = Path(os.environ.get("MD_ROOT", os.path.expanduser("~/clawd")))
+PORT = int(os.environ.get("MD_PORT", "8787"))
+BIND = os.environ.get("MD_BIND", "0.0.0.0")
+
+CSS = """
+body { font-family: -apple-system, system-ui, sans-serif; max-width: 800px;
+       margin: 2em auto; padding: 0 1em; color: #222; background: #fafafa;
+       line-height: 1.6; }
+pre { background: #f0f0f0; padding: 1em; overflow-x: auto; border-radius: 6px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+a { color: #0066cc; }
+h1,h2,h3 { margin-top: 1.5em; }
+.file-list { list-style: none; padding: 0; }
+.file-list li { padding: 4px 0; }
+.file-list a { text-decoration: none; }
+.file-list a:hover { text-decoration: underline; }
+.breadcrumb { margin-bottom: 1em; color: #666; }
+.breadcrumb a { color: #0066cc; }
+.edit-btn { position: fixed; top: 1em; right: 1em; background: #0066cc; color: white;
+            border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;
+            font-size: 14px; }
+textarea { width: 100%; min-height: 60vh; font-family: monospace; font-size: 14px;
+           padding: 1em; border: 1px solid #ccc; border-radius: 6px; }
+.save-btn { background: #28a745; color: white; border: none; padding: 10px 20px;
+            border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 8px; }
+#reload-banner { display:none; position:fixed; top:0; left:0; right:0; background:#28a745;
+                 color:white; text-align:center; padding:8px; cursor:pointer; z-index:999; }
+"""
+
+LIVE_RELOAD_JS = '''
+&lt;div id="reload-banner" onclick="location.reload()"&gt;File updated - click to reload&lt;/div&gt;
+&lt;script&gt;
+(function() {
+  var hash = "HASH_PLACEHOLDER";
+  setInterval(function() {
+    fetch(location.pathname + "?hash=1").then(r =&gt; r.text()).then(h =&gt; {
+      if (h !== hash) { document.getElementById("reload-banner").style.display = "block"; hash = h; }
+    }).catch(function(){});
+  }, 2000);
+})();
+&lt;/script&gt;
+'''
+
+md_ext = markdown.Markdown(extensions=["fenced_code", "tables", "toc"])
+
+def file_hash(p):
+    try: return hashlib.md5(p.read_bytes()).hexdigest()
+    except: return ""
+
+def render_dir(rel_path):
+    d = ROOT / rel_path
+    parts = ['&lt;div class="breadcrumb"&gt;']
+    parts.append('&lt;a href="/"&gt;~/workspace&lt;/a&gt; / ')
+    cumulative = ""
+    for seg in rel_path.parts:
+        cumulative += seg + "/"
+        parts.append(f'&lt;a href="/{cumulative}"&gt;{seg}&lt;/a&gt; / ')
+    parts.append("&lt;/div&gt;&lt;h1&gt;{}&lt;/h1&gt;&lt;ul class='file-list'&gt;".format(rel_path or "workspace"))
+    for item in sorted(d.iterdir(), key=lambda x: (not x.is_dir(), x.name.lower())):
+        if item.name.startswith("."): continue
+        rp = item.relative_to(ROOT)
+        icon = "📂" if item.is_dir() else "📄"
+        parts.append(f'&lt;li&gt;{icon} &lt;a href="/{rp}{"/" if item.is_dir() else ""}"&gt;{item.name}&lt;/a&gt;&lt;/li&gt;')
+    parts.append("&lt;/ul&gt;")
+    return "\n".join(parts)
+
+# ... (full render_md, render_edit, Handler class)
+# See raw download link above for complete file</code></pre>
+  </div>
+
+  <p><strong>The display above is abbreviated.</strong> Use the <a href="/guides/md-server.py">raw download</a> or tell your agent to fetch it.</p>
+
+  <h3>Persistence config</h3>
+
+  <h4>Linux (systemd)</h4>
+  <pre><code>[Unit]
+Description=Markdown Workspace Viewer
+After=network.target tailscaled.service
+
+[Service]
+ExecStart=/usr/bin/python3 /root/clawd/scripts/md-server.py
+Environment=MD_ROOT=/root/clawd
+Environment=MD_PORT=8787
+Environment=MD_BIND=0.0.0.0
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+  <p><code>systemctl enable --now md-viewer</code></p>
+
+  <h4>macOS (launchd)</h4>
+  <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
+&lt;plist version="1.0"&gt;
+&lt;dict&gt;
+  &lt;key&gt;Label&lt;/key&gt;&lt;string&gt;com.md-viewer&lt;/string&gt;
+  &lt;key&gt;ProgramArguments&lt;/key&gt;
+  &lt;array&gt;
+    &lt;string&gt;/usr/bin/python3&lt;/string&gt;
+    &lt;string&gt;HOMEDIR/clawd/scripts/md-server.py&lt;/string&gt;
+  &lt;/array&gt;
+  &lt;key&gt;EnvironmentVariables&lt;/key&gt;
+  &lt;dict&gt;
+    &lt;key&gt;MD_ROOT&lt;/key&gt;&lt;string&gt;HOMEDIR/clawd&lt;/string&gt;
+    &lt;key&gt;MD_PORT&lt;/key&gt;&lt;string&gt;8787&lt;/string&gt;
+    &lt;key&gt;MD_BIND&lt;/key&gt;&lt;string&gt;0.0.0.0&lt;/string&gt;
+  &lt;/dict&gt;
+  &lt;key&gt;RunAtLoad&lt;/key&gt;&lt;true/&gt;
+  &lt;key&gt;KeepAlive&lt;/key&gt;&lt;true/&gt;
+  &lt;key&gt;StandardOutPath&lt;/key&gt;&lt;string&gt;/tmp/md-viewer.log&lt;/string&gt;
+  &lt;key&gt;StandardErrorPath&lt;/key&gt;&lt;string&gt;/tmp/md-viewer.log&lt;/string&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;</code></pre>
+  <p>Replace <code>HOMEDIR</code> with actual home path. Then: <code>launchctl load ~/Library/LaunchAgents/com.md-viewer.plist</code></p>
+
+  <hr class="divider">
+
+  <h2><span class="badge badge-human">👤 YOU</span> Part 2: Do This Yourself</h2>
+  <p>Your agent handles the server. You just connect your devices.</p>
+
+  <h3>1. Install Tailscale everywhere</h3>
+  <p>Sign in with the <strong>same account</strong> on each device.</p>
+  <table>
+    <tr><th>Device</th><th>Install</th></tr>
+    <tr><td>Mac Mini (host)</td><td><code>brew install tailscale</code> or <a href="https://tailscale.com/download/mac">download</a></td></tr>
+    <tr><td>MacBook</td><td><code>brew install tailscale</code> or <a href="https://tailscale.com/download/mac">download</a></td></tr>
+    <tr><td>iPhone</td><td><a href="https://apps.apple.com/app/tailscale/id1470499037">App Store</a></td></tr>
+  </table>
+
+  <h3>2. Verify devices see each other</h3>
+  <pre><code>tailscale status</code></pre>
+  <p>All devices should appear with <code>100.x.x.x</code> addresses. Note your Mac Mini's IP.</p>
+
+  <h3>3. Open the viewer</h3>
+  <pre><code>http://[MAC-MINI-TAILSCALE-IP]:8787</code></pre>
+
+  <h3>4. Bookmark it</h3>
+  <p><strong>iPhone:</strong> Safari &gt; Share &gt; Add to Home Screen<br>
+  <strong>MacBook:</strong> Bookmark in your browser</p>
+
+  <hr class="divider">
+
+  <h2>How it works</h2>
+  <div class="diagram">┌─────────────┐                    ┌──────────────────┐
+│   iPhone    │                    │   Mac Mini       │
+│   MacBook   │ ── Tailscale ───&gt;  │   md-server.py   │
+│             │    encrypted       │   ~/clawd/       │
+└─────────────┘                    └──────────────────┘</div>
+  <ul>
+    <li>Python reads your workspace and renders markdown as styled HTML</li>
+    <li>Edit files in the browser, save with one click</li>
+    <li>Live reload detects when your AI agent changes a file</li>
+    <li>Tailscale encrypts everything in transit</li>
+    <li>Nothing is exposed to the public internet</li>
+  </ul>
+
+  <h2>Troubleshooting</h2>
+  <table>
+    <tr><th>Problem</th><th>Fix</th></tr>
+    <tr><td>Can't connect from other devices</td><td>Is Tailscale running? <code>tailscale status</code></td></tr>
+    <tr><td>Can ping but page won't load</td><td>Is the server running? <code>curl http://localhost:8787</code></td></tr>
+    <tr><td>Import error on startup</td><td><code>pip3 install markdown</code></td></tr>
+    <tr><td>Port already in use</td><td><code>lsof -i :8787</code></td></tr>
+    <tr><td>Files not showing</td><td>Check <code>MD_ROOT</code> env var</td></tr>
+  </table>
+
+  <div class="callout" style="margin-top: 3em;">
+    <div class="callout-title">About</div>
+    <p style="margin:0">Built by <a href="https://www.alexyao.me">Alex Yao</a>. The whole viewer is ~150 lines of Python. Part of the OpenClaw ecosystem.</p>
+  </div>
+
+  <script>
+    function copyById(id, btn) {
+      const el = document.getElementById(id);
+      const tmp = document.createElement('textarea');
+      tmp.innerHTML = el.innerHTML;
+      // decode HTML entities
+      let text = tmp.value.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&');
+      navigator.clipboard.writeText(text);
+      btn.textContent = '✅ Copied';
+      setTimeout(() => btn.textContent = '📋 Copy', 2000);
+    }
+  </script>
+</body>
+</html>
