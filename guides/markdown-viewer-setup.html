@@ -3,181 +3,501 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Markdown Viewer Setup Guide - Alex Yao</title>
+  <title>Set up a workspace viewer for OpenClaw - Alex Yao</title>
   <meta name="description" content="Browse and edit your OpenClaw workspace files from any device. Tailscale + a tiny Python server. One link to set it all up.">
   <meta name="author" content="Alex Yao">
   <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/favicon-src.png" type="image/png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="canonical" href="https://www.alexyao.me/guides/markdown-viewer-setup">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Set up a workspace viewer for OpenClaw">
+  <meta property="og:description" content="Browse and edit your OpenClaw workspace files from any device. Tailscale + a tiny Python server.">
+  <meta property="og:url" content="https://www.alexyao.me/guides/markdown-viewer-setup">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #F6F1EB;
+      --bg-warm: #EDE7DF;
+      --bg-card: #FDFBF8;
+      --text: #2D2926;
+      --text-secondary: #6B6560;
+      --text-tertiary: #9C9590;
+      --accent: #C2791D;
+      --accent-hover: #A8671A;
+      --accent-light: #F0DCC4;
+      --border: #DDD6CD;
+      --serif: 'Instrument Serif', 'Georgia', serif;
+      --sans: 'Inter', -apple-system, sans-serif;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-           max-width: 720px; margin: 0 auto; padding: 2em 1.5em; color: #1a1a1a;
-           background: #fafaf9; line-height: 1.7; }
-    h1 { font-size: 2em; margin-bottom: 0.3em; letter-spacing: -0.02em; }
-    h2 { font-size: 1.4em; margin-top: 2.5em; margin-bottom: 0.5em; padding-bottom: 0.3em;
-         border-bottom: 1px solid #e5e5e5; }
-    h3 { font-size: 1.1em; margin-top: 1.5em; margin-bottom: 0.4em; }
-    p { margin-bottom: 1em; }
-    .subtitle { color: #666; font-size: 1.1em; margin-bottom: 2em; }
-    ul, ol { margin-bottom: 1em; padding-left: 1.5em; }
-    li { margin-bottom: 0.4em; }
-    pre { background: #1a1a1a; color: #e5e5e5; padding: 1.2em; border-radius: 8px;
-          overflow-x: auto; margin-bottom: 1.2em; font-size: 0.85em; line-height: 1.5; }
-    code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
-    pre code { background: none; padding: 0; color: inherit; }
-    a { color: #0066cc; }
-    .badge { display: inline-block; padding: 2px 10px; border-radius: 12px;
-             font-size: 0.8em; font-weight: 600; margin-right: 0.5em; }
-    .badge-agent { background: #e8f5e9; color: #2e7d32; }
-    .badge-human { background: #fff3e0; color: #e65100; }
-    .callout { background: #f5f5f0; border-left: 4px solid #1a1a1a; padding: 1em 1.2em;
-               margin: 1.5em 0; border-radius: 0 6px 6px 0; }
-    .callout-title { font-weight: 600; margin-bottom: 0.3em; }
-    .hero-box { background: #1a1a1a; color: white; border-radius: 12px; padding: 1.5em;
-                margin: 2em 0; text-align: center; }
-    .hero-box p { color: #aaa; margin-bottom: 0.8em; }
-    .hero-box code { background: #333; color: #4ade80; padding: 6px 14px; border-radius: 6px;
-                     font-size: 0.95em; display: inline-block; margin: 0.3em 0; }
-    .hero-box .label { font-size: 0.75em; text-transform: uppercase; letter-spacing: 0.1em;
-                       color: #888; margin-bottom: 0.3em; }
-    .divider { border: none; border-top: 2px solid #1a1a1a; margin: 3em 0; }
-    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; margin: 1.5em 0; }
-    .feature-card { background: white; border: 1px solid #e5e5e5; border-radius: 8px; padding: 1em; }
-    .feature-card strong { display: block; margin-bottom: 0.3em; }
-    .back { display: inline-block; margin-bottom: 1.5em; color: #666; text-decoration: none; font-size: 0.9em; }
-    .back:hover { color: #1a1a1a; }
-    .copy-section { background: white; border: 2px solid #1a1a1a; border-radius: 12px;
-                    padding: 1.5em; margin: 1.5em 0; position: relative; }
-    .copy-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1em; }
-    .copy-btn { background: #1a1a1a; color: white; border: none; padding: 8px 16px;
-                border-radius: 6px; cursor: pointer; font-size: 0.85em; }
-    .copy-btn:hover { background: #333; }
-    table { width: 100%; border-collapse: collapse; margin: 1em 0; }
-    th, td { text-align: left; padding: 0.6em 1em; border-bottom: 1px solid #e5e5e5; }
-    th { font-weight: 600; background: #f5f5f0; }
-    .diagram { background: #1a1a1a; color: #e5e5e5; padding: 1.5em; border-radius: 8px;
-               font-family: monospace; font-size: 0.85em; line-height: 1.6; margin: 1.5em 0;
-               text-align: center; white-space: pre; }
+    html { font-size: 18px; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: var(--accent-light); color: var(--text); }
+    a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--accent-hover); }
+
+    /* Nav */
+    nav {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 2rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-name {
+      font-family: var(--serif);
+      font-size: 1.4rem;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* Article layout */
+    .article-header {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 4rem 2rem 0;
+    }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .article-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 0.2rem 0.6rem;
+      border-radius: 3px;
+    }
+    .article-date {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: 2.8rem;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .article-header .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .divider {
+      max-width: 740px;
+      margin: 3rem auto;
+      padding: 0 2rem;
+    }
+    .divider hr { border: none; border-top: 1px solid var(--border); }
+
+    /* Article body */
+    .article-body {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.8rem;
+      font-weight: 400;
+      margin-top: 3rem;
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+    }
+    .article-body h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+    }
+    .article-body p {
+      margin-bottom: 1.2rem;
+      line-height: 1.75;
+    }
+    .article-body ul, .article-body ol {
+      margin-bottom: 1.2rem;
+      padding-left: 1.5rem;
+    }
+    .article-body li {
+      margin-bottom: 0.5rem;
+      line-height: 1.65;
+    }
+    .article-body pre {
+      background: var(--text);
+      color: #E8E4E0;
+      padding: 1.2rem 1.5rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    .article-body code {
+      background: var(--bg-warm);
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      font-size: 0.88rem;
+    }
+    .article-body pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+    }
+    .article-body th, .article-body td {
+      text-align: left;
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body th {
+      font-weight: 600;
+      background: var(--bg-warm);
+      font-size: 0.8rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* Callout */
+    .callout {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 6px 6px 0;
+      margin: 1.5rem 0;
+    }
+    .callout-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
+    .callout p { margin-bottom: 0; }
+
+    /* Feature grid */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.25rem;
+    }
+    .feature-card strong {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-size: 0.9rem;
+    }
+    .feature-card span {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Copy box */
+    .copy-box {
+      background: var(--text);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      text-align: center;
+    }
+    .copy-box .label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-tertiary);
+      margin-bottom: 0.75rem;
+    }
+    .copy-box code {
+      background: #3D3835;
+      color: #E8E4E0;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+    .copy-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .copy-btn:hover { background: var(--accent-hover); }
+
+    /* Diagram */
+    .diagram {
+      background: var(--text);
+      color: #E8E4E0;
+      padding: 1.5rem;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      margin: 1.5rem 0;
+      text-align: center;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 3px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-right: 0.5rem;
+    }
+    .badge-agent { background: var(--accent-light); color: var(--accent-hover); }
+    .badge-human { background: #E8E4E0; color: var(--text); }
+
+    /* Steps */
     .steps { counter-reset: step; list-style: none; padding-left: 0; }
-    .steps li { counter-increment: step; position: relative; padding-left: 2.5em; margin-bottom: 1.2em; }
-    .steps li::before { content: counter(step); position: absolute; left: 0; top: 0;
-                        background: #1a1a1a; color: white; width: 1.8em; height: 1.8em;
-                        border-radius: 50%; display: flex; align-items: center;
-                        justify-content: center; font-size: 0.85em; font-weight: 600; }
-    @media (max-width: 600px) {
-      body { padding: 1.5em 1em; }
+    .steps li {
+      counter-increment: step;
+      position: relative;
+      padding-left: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      background: var(--accent);
+      color: #fff;
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    /* Back link */
+    .back-link {
+      display: inline-block;
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+      margin-bottom: 2rem;
+    }
+    .back-link:hover { color: var(--text); }
+
+    /* Footer */
+    footer {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 2rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-links { display: flex; gap: 2rem; list-style: none; }
+    .footer-links a { font-size: 0.85rem; color: var(--text-tertiary); }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 0.8rem; color: var(--text-tertiary); }
+
+    @media (max-width: 768px) {
+      html { font-size: 16px; }
+      nav { padding: 1.5rem 1.25rem 0; }
+      .nav-links { gap: 1.25rem; }
+      .article-header { padding: 2.5rem 1.25rem 0; }
+      .article-header h1 { font-size: 2rem; }
+      .article-body { padding: 0 1.25rem; }
+      .divider { padding: 0 1.25rem; }
       .feature-grid { grid-template-columns: 1fr; }
-      h1 { font-size: 1.6em; }
+      footer {
+        flex-direction: column; gap: 1rem;
+        padding: 2rem 1.25rem 3rem;
+      }
     }
   </style>
 </head>
 <body>
-  <a href="/" class="back">&larr; alexyao.me</a>
-  <h1>Markdown Viewer Setup</h1>
-  <p class="subtitle">Browse and edit your OpenClaw workspace from any device. No cloud, no port forwarding.</p>
 
-  <div class="feature-grid">
-    <div class="feature-card"><strong>📂 File Browser</strong>Navigate your whole workspace in a clean web UI</div>
-    <div class="feature-card"><strong>📝 Rendered Markdown</strong>Syntax highlighting, tables, table of contents</div>
-    <div class="feature-card"><strong>✏️ In-Browser Editing</strong>Edit and save files directly from your phone</div>
-    <div class="feature-card"><strong>🔄 Live Reload</strong>See when your AI edits a file, one tap to refresh</div>
+  <nav>
+    <a href="/" class="nav-name">Alex Yao</a>
+    <ul class="nav-links">
+      <li><a href="/#desk">Building</a></li>
+      <li><a href="/guides/">Guides</a></li>
+      <li><a href="/#work-with-me">Work with me</a></li>
+    </ul>
+  </nav>
+
+  <div class="article-header">
+    <a href="/guides/" class="back-link">&larr; All guides</a>
+    <div class="article-meta">
+      <span class="article-tag">OpenClaw</span>
+      <span class="article-date">March 2026</span>
+    </div>
+    <h1>Set up a workspace viewer for OpenClaw</h1>
+    <p class="subtitle">Browse and edit your OpenClaw workspace files from any device. Tailscale + a tiny Python server. No cloud, no port forwarding.</p>
   </div>
 
-  <div class="callout">
-    <div class="callout-title">What you need</div>
-    <p style="margin:0">A machine running OpenClaw (Mac Mini, VPS, etc.), Python 3, and Tailscale on all devices you want to access from.</p>
-  </div>
+  <div class="divider"><hr></div>
 
-  <hr class="divider">
+  <div class="article-body">
 
-  <h2><span class="badge badge-agent">🤖 AGENT</span> Part 1: Send to Your AI Agent</h2>
+    <div class="feature-grid">
+      <div class="feature-card"><strong>📂 File Browser</strong><span>Navigate your whole workspace in a clean web UI</span></div>
+      <div class="feature-card"><strong>📝 Rendered Markdown</strong><span>Syntax highlighting, tables, table of contents</span></div>
+      <div class="feature-card"><strong>✏️ In-Browser Editing</strong><span>Edit and save files directly from your phone</span></div>
+      <div class="feature-card"><strong>🔄 Live Reload</strong><span>See when your AI edits a file, one tap to refresh</span></div>
+    </div>
 
-  <p>Send your OpenClaw / Claude agent this message. It will fetch the instructions and set everything up automatically.</p>
+    <div class="callout">
+      <div class="callout-title">What you need</div>
+      <p>A machine running OpenClaw (Mac Mini, VPS, etc.), Python 3, and Tailscale on all devices you want to access from.</p>
+    </div>
 
-  <div class="hero-box">
-    <div class="label">Send this to your AI agent</div>
-    <code id="agent-msg">Follow the setup instructions at https://www.alexyao.me/guides/markdown-viewer-setup.md</code>
-    <br><br>
-    <button class="copy-btn" style="background: #4ade80; color: #1a1a1a; font-weight: 600;" onclick="copyText('agent-msg', this)">📋 Copy Message</button>
-  </div>
+    <h2><span class="badge badge-agent">🤖 Agent</span> Part 1: Send to your AI agent</h2>
 
-  <p>That's it. The <a href="/guides/markdown-viewer-setup.md">.md file</a> contains step-by-step instructions your AI agent can read and execute: install dependencies, write the server script, set up persistence (systemd or launchd), and verify it's running.</p>
+    <p>Send your OpenClaw / Claude agent this message. It will fetch the instructions and set everything up automatically.</p>
 
-  <p>The agent will report back with the Tailscale IP and URL when it's done.</p>
+    <div class="copy-box">
+      <div class="label">Send this to your AI agent</div>
+      <code id="agent-msg">Follow the setup instructions at https://www.alexyao.me/guides/markdown-viewer-setup.md</code>
+      <br>
+      <button class="copy-btn" onclick="copyText('agent-msg', this)">📋 Copy Message</button>
+    </div>
 
-  <div class="callout">
-    <div class="callout-title">What the agent does</div>
-    <ol class="steps">
-      <li><strong>Installs</strong> the Python markdown library</li>
-      <li><strong>Creates</strong> the server script (~150 lines of Python)</li>
-      <li><strong>Configures</strong> persistence (auto-start on reboot)</li>
-      <li><strong>Starts</strong> the server and verifies it's running</li>
-      <li><strong>Reports</strong> the Tailscale IP and access URL</li>
-    </ol>
-  </div>
+    <p>That's it. The <a href="/guides/markdown-viewer-setup.md">.md file</a> contains step-by-step instructions your AI agent can read and execute: install dependencies, write the server script, set up persistence (systemd or launchd), and verify it's running.</p>
 
-  <hr class="divider">
+    <div class="callout">
+      <div class="callout-title">What the agent does</div>
+      <ol class="steps">
+        <li><strong>Installs</strong> the Python markdown library</li>
+        <li><strong>Creates</strong> the server script (~150 lines of Python)</li>
+        <li><strong>Configures</strong> persistence (auto-start on reboot)</li>
+        <li><strong>Starts</strong> the server and verifies it's running</li>
+        <li><strong>Reports</strong> the Tailscale IP and access URL</li>
+      </ol>
+    </div>
 
-  <h2><span class="badge badge-human">👤 YOU</span> Part 2: Connect Your Devices</h2>
-  <p>Your agent handles the server. You just connect your other devices to the same Tailscale network.</p>
+    <h2><span class="badge badge-human">👤 You</span> Part 2: Connect your devices</h2>
 
-  <h3>1. Install Tailscale everywhere</h3>
-  <p>Sign in with the <strong>same account</strong> on each device.</p>
-  <table>
-    <tr><th>Device</th><th>Install</th></tr>
-    <tr><td>Mac Mini (host)</td><td><code>brew install tailscale</code> or <a href="https://tailscale.com/download/mac">download</a></td></tr>
-    <tr><td>MacBook</td><td><code>brew install tailscale</code> or <a href="https://tailscale.com/download/mac">download</a></td></tr>
-    <tr><td>iPhone</td><td><a href="https://apps.apple.com/app/tailscale/id1470499037">App Store</a></td></tr>
-  </table>
+    <p>Your agent handles the server. You just connect your other devices to the same Tailscale network.</p>
 
-  <h3>2. Verify devices see each other</h3>
-  <pre><code>tailscale status</code></pre>
-  <p>All devices should appear with <code>100.x.x.x</code> addresses. Note your host machine's IP.</p>
+    <h3>1. Install Tailscale everywhere</h3>
+    <p>Sign in with the <strong>same account</strong> on each device.</p>
+    <table>
+      <tr><th>Device</th><th>Install</th></tr>
+      <tr><td>Mac Mini (host)</td><td><code>brew install tailscale</code> or <a href="https://tailscale.com/download/mac">download</a></td></tr>
+      <tr><td>MacBook</td><td><code>brew install tailscale</code> or <a href="https://tailscale.com/download/mac">download</a></td></tr>
+      <tr><td>iPhone</td><td><a href="https://apps.apple.com/app/tailscale/id1470499037">App Store</a></td></tr>
+    </table>
 
-  <h3>3. Open the viewer</h3>
-  <pre><code>http://[YOUR-TAILSCALE-IP]:8787</code></pre>
-  <p>Your agent will have given you this URL when it finished setup.</p>
+    <h3>2. Verify devices see each other</h3>
+    <pre><code>tailscale status</code></pre>
+    <p>All devices should appear with <code>100.x.x.x</code> addresses. Note your host machine's IP.</p>
 
-  <h3>4. Bookmark it</h3>
-  <p><strong>iPhone:</strong> Safari &gt; Share &gt; Add to Home Screen<br>
-  <strong>MacBook:</strong> Bookmark in your browser</p>
+    <h3>3. Open the viewer</h3>
+    <pre><code>http://[YOUR-TAILSCALE-IP]:8787</code></pre>
+    <p>Your agent will have given you this URL when it finished setup.</p>
 
-  <hr class="divider">
+    <h3>4. Bookmark it</h3>
+    <p><strong>iPhone:</strong> Safari &gt; Share &gt; Add to Home Screen<br>
+    <strong>MacBook:</strong> Bookmark in your browser</p>
 
-  <h2>How it works</h2>
-  <div class="diagram">┌─────────────┐                    ┌──────────────────┐
+    <h2>How it works</h2>
+    <div class="diagram">┌─────────────┐                    ┌──────────────────┐
 │   iPhone    │                    │   Host Machine   │
 │   MacBook   │ ── Tailscale ───&gt;  │   md-server.py   │
 │             │    encrypted       │   ~/clawd/       │
 └─────────────┘                    └──────────────────┘</div>
-  <ul>
-    <li>Python reads your workspace and renders markdown as styled HTML</li>
-    <li>Edit files in the browser, save with one click</li>
-    <li>Live reload detects when your AI agent changes a file</li>
-    <li>Tailscale encrypts everything in transit</li>
-    <li>Nothing is exposed to the public internet</li>
-  </ul>
+    <ul>
+      <li>Python reads your workspace and renders markdown as styled HTML</li>
+      <li>Edit files in the browser, save with one click</li>
+      <li>Live reload detects when your AI agent changes a file</li>
+      <li>Tailscale encrypts everything in transit</li>
+      <li>Nothing is exposed to the public internet</li>
+    </ul>
 
-  <h2>Troubleshooting</h2>
-  <table>
-    <tr><th>Problem</th><th>Fix</th></tr>
-    <tr><td>Can't connect from other devices</td><td>Is Tailscale running? <code>tailscale status</code></td></tr>
-    <tr><td>Can ping but page won't load</td><td>Is the server running? <code>curl http://localhost:8787</code></td></tr>
-    <tr><td>Import error on startup</td><td><code>pip3 install markdown</code></td></tr>
-    <tr><td>Port already in use</td><td><code>lsof -i :8787</code></td></tr>
-    <tr><td>Files not showing</td><td>Check <code>MD_ROOT</code> env var</td></tr>
-  </table>
+    <h2>Troubleshooting</h2>
+    <table>
+      <tr><th>Problem</th><th>Fix</th></tr>
+      <tr><td>Can't connect from other devices</td><td>Is Tailscale running? <code>tailscale status</code></td></tr>
+      <tr><td>Can ping but page won't load</td><td>Is the server running? <code>curl http://localhost:8787</code></td></tr>
+      <tr><td>Import error on startup</td><td><code>pip3 install markdown</code></td></tr>
+      <tr><td>Port already in use</td><td><code>lsof -i :8787</code></td></tr>
+      <tr><td>Files not showing</td><td>Check <code>MD_ROOT</code> env var</td></tr>
+    </table>
 
-  <h2>Resources</h2>
-  <table>
-    <tr><th>File</th><th>Description</th></tr>
-    <tr><td><a href="/guides/markdown-viewer-setup.md">setup instructions (.md)</a></td><td>AI-readable instructions with script inline - what your agent fetches</td></tr>
-  </table>
+    <h2>Resources</h2>
+    <table>
+      <tr><th>File</th><th>Description</th></tr>
+      <tr><td><a href="/guides/markdown-viewer-setup.md">Setup instructions (.md)</a></td><td>AI-readable instructions with full script inline</td></tr>
+    </table>
 
-  <div class="callout" style="margin-top: 3em;">
-    <div class="callout-title">About</div>
-    <p style="margin:0">Built by <a href="https://www.alexyao.me">Alex Yao</a>. The whole viewer is ~150 lines of Python. Part of the <a href="https://github.com/openclaw/openclaw">OpenClaw</a> ecosystem.</p>
+    <div class="callout" style="margin-top: 3rem;">
+      <div class="callout-title">About this guide</div>
+      <p>Built by <a href="/">Alex Yao</a>. The whole viewer is ~150 lines of Python. Part of the <a href="https://github.com/openclaw/openclaw">OpenClaw</a> ecosystem.</p>
+    </div>
+
   </div>
+
+  <div class="divider"><hr></div>
+
+  <footer>
+    <ul class="footer-links">
+      <li><a href="https://linkedin.com/in/thealexyao">LinkedIn</a></li>
+      <li><a href="https://x.com/TheAlexYao">X / Twitter</a></li>
+      <li><a href="https://www.skool.com/agent-j">Agent-J Free</a></li>
+      <li><a href="https://www.skool.com/agent-j-plus">Agent-J+</a></li>
+      <li><a href="https://cal.com/alexyao">Book a call</a></li>
+      <li><a href="mailto:alex@alexyao.me">Email</a></li>
+    </ul>
+    <span class="footer-copy">&copy; 2026 Alex Yao</span>
+  </footer>
 
   <script>
     function copyText(id, btn) {
@@ -187,5 +507,6 @@
       setTimeout(() => btn.textContent = '📋 Copy Message', 2000);
     }
   </script>
+
 </body>
 </html>

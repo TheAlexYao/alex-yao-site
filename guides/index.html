@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guides - Alex Yao</title>
+  <meta name="description" content="Setup guides and tutorials for OpenClaw, Claude Code, and AI agent workflows.">
+  <meta name="author" content="Alex Yao">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/favicon-src.png" type="image/png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="canonical" href="https://www.alexyao.me/guides/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F6F1EB;
+      --bg-warm: #EDE7DF;
+      --bg-card: #FDFBF8;
+      --text: #2D2926;
+      --text-secondary: #6B6560;
+      --text-tertiary: #9C9590;
+      --accent: #C2791D;
+      --accent-hover: #A8671A;
+      --accent-light: #F0DCC4;
+      --border: #DDD6CD;
+      --serif: 'Instrument Serif', 'Georgia', serif;
+      --sans: 'Inter', -apple-system, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 18px; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: var(--accent-light); color: var(--text); }
+    a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--accent-hover); }
+
+    nav {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 2rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-name {
+      font-family: var(--serif);
+      font-size: 1.4rem;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .page-header {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 4rem 2rem 0;
+    }
+    .page-header h1 {
+      font-family: var(--serif);
+      font-size: 3rem;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+    }
+    .page-header p {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      line-height: 1.7;
+    }
+
+    .divider {
+      max-width: 1100px;
+      margin: 3rem auto;
+      padding: 0 2rem;
+    }
+    .divider hr { border: none; border-top: 1px solid var(--border); }
+
+    .guides-list {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      list-style: none;
+    }
+    .guide-item {
+      padding: 2rem 0;
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 2rem;
+      align-items: baseline;
+    }
+    .guide-item:first-child { padding-top: 0; }
+    .guide-item:last-child { border-bottom: none; }
+    .guide-date {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      font-variant-numeric: tabular-nums;
+    }
+    .guide-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 0.15rem 0.5rem;
+      border-radius: 3px;
+      margin-bottom: 0.5rem;
+    }
+    .guide-title {
+      font-family: var(--serif);
+      font-size: 1.4rem;
+      font-weight: 400;
+      color: var(--text);
+      display: block;
+      transition: color 0.2s;
+    }
+    .guide-title:hover { color: var(--accent); }
+    .guide-excerpt {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin-top: 0.4rem;
+      line-height: 1.65;
+    }
+
+    footer {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 2rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-links { display: flex; gap: 2rem; list-style: none; }
+    .footer-links a { font-size: 0.85rem; color: var(--text-tertiary); }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 0.8rem; color: var(--text-tertiary); }
+
+    @media (max-width: 768px) {
+      html { font-size: 16px; }
+      nav { padding: 1.5rem 1.25rem 0; }
+      .nav-links { gap: 1.25rem; }
+      .page-header { padding: 2.5rem 1.25rem 0; }
+      .page-header h1 { font-size: 2.2rem; }
+      .guides-list { padding: 0 1.25rem; }
+      .guide-item { grid-template-columns: 1fr; gap: 0.25rem; }
+      .divider { padding: 0 1.25rem; }
+      footer {
+        flex-direction: column; gap: 1rem;
+        padding: 2rem 1.25rem 3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-name">Alex Yao</a>
+    <ul class="nav-links">
+      <li><a href="/#desk">Building</a></li>
+      <li><a href="/guides/">Guides</a></li>
+      <li><a href="/#work-with-me">Work with me</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-header">
+    <h1>Guides</h1>
+    <p>Setup guides, tutorials, and deep dives on the tools I use daily. Practical, no fluff.</p>
+  </div>
+
+  <div class="divider"><hr></div>
+
+  <ul class="guides-list">
+    <li class="guide-item">
+      <div>
+        <span class="guide-date">Mar 2026</span>
+      </div>
+      <div>
+        <span class="guide-tag">OpenClaw</span>
+        <a href="/guides/markdown-viewer-setup" class="guide-title">Set up a workspace viewer for OpenClaw</a>
+        <p class="guide-excerpt">Browse and edit your OpenClaw workspace files from any device. Tailscale + a tiny Python server. One link to access everything.</p>
+      </div>
+    </li>
+  </ul>
+
+  <div class="divider"><hr></div>
+
+  <footer>
+    <ul class="footer-links">
+      <li><a href="https://linkedin.com/in/thealexyao">LinkedIn</a></li>
+      <li><a href="https://x.com/TheAlexYao">X / Twitter</a></li>
+      <li><a href="https://www.skool.com/agent-j">Agent-J Free</a></li>
+      <li><a href="https://www.skool.com/agent-j-plus">Agent-J+</a></li>
+      <li><a href="https://cal.com/alexyao">Book a call</a></li>
+      <li><a href="mailto:alex@alexyao.me">Email</a></li>
+    </ul>
+    <span class="footer-copy">&copy; 2026 Alex Yao</span>
+  </footer>
+
+</body>
+</html>
