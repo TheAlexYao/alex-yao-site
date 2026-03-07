@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automate Meeting Follow-Up with Granola + OpenClaw - Alex Yao</title>
+  <meta name="description" content="Wire Granola meeting notes directly into your OpenClaw agent. Every meeting gets transcribed, summarized, and turned into action items automatically.">
+  <meta name="author" content="Alex Yao">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/favicon-src.png" type="image/png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="canonical" href="https://www.alexyao.me/guides/granola-meeting-pipeline">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Automate Meeting Follow-Up with Granola + OpenClaw">
+  <meta property="og:description" content="Wire Granola meeting notes directly into your OpenClaw agent. Every meeting gets transcribed, summarized, and turned into action items automatically.">
+  <meta property="og:url" content="https://www.alexyao.me/guides/granola-meeting-pipeline">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F6F1EB;
+      --bg-warm: #EDE7DF;
+      --bg-card: #FDFBF8;
+      --text: #2D2926;
+      --text-secondary: #6B6560;
+      --text-tertiary: #9C9590;
+      --accent: #C2791D;
+      --accent-hover: #A8671A;
+      --accent-light: #F0DCC4;
+      --border: #DDD6CD;
+      --serif: 'Instrument Serif', 'Georgia', serif;
+      --sans: 'Inter', -apple-system, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 18px; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: var(--accent-light); color: var(--text); }
+    a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--accent-hover); }
+
+    /* Nav */
+    nav {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 2rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-name {
+      font-family: var(--serif);
+      font-size: 1.4rem;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* Article layout */
+    .article-header {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 4rem 2rem 0;
+    }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .article-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 0.2rem 0.6rem;
+      border-radius: 3px;
+    }
+    .article-date {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: 2.8rem;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .article-header .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .divider {
+      max-width: 740px;
+      margin: 3rem auto;
+      padding: 0 2rem;
+    }
+    .divider hr { border: none; border-top: 1px solid var(--border); }
+
+    /* Article body */
+    .article-body {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.8rem;
+      font-weight: 400;
+      margin-top: 3rem;
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+    }
+    .article-body h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+    }
+    .article-body p {
+      margin-bottom: 1.2rem;
+      line-height: 1.75;
+    }
+    .article-body ul, .article-body ol {
+      margin-bottom: 1.2rem;
+      padding-left: 1.5rem;
+    }
+    .article-body li {
+      margin-bottom: 0.5rem;
+      line-height: 1.65;
+    }
+    .article-body pre {
+      background: var(--text);
+      color: #E8E4E0;
+      padding: 1.2rem 1.5rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    .article-body code {
+      background: var(--bg-warm);
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      font-size: 0.88rem;
+    }
+    .article-body pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+    }
+    .article-body th, .article-body td {
+      text-align: left;
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body th {
+      font-weight: 600;
+      background: var(--bg-warm);
+      font-size: 0.8rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* Callout */
+    .callout {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 6px 6px 0;
+      margin: 1.5rem 0;
+    }
+    .callout-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
+    .callout p { margin-bottom: 0; }
+
+    /* Feature grid */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.25rem;
+    }
+    .feature-card strong {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-size: 0.9rem;
+    }
+    .feature-card span {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Copy box */
+    .copy-box {
+      background: var(--text);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      text-align: center;
+    }
+    .copy-box .label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-tertiary);
+      margin-bottom: 0.75rem;
+    }
+    .copy-box code {
+      background: #3D3835;
+      color: #E8E4E0;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+    .copy-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .copy-btn:hover { background: var(--accent-hover); }
+
+    /* Diagram */
+    .diagram {
+      background: var(--text);
+      color: #E8E4E0;
+      padding: 1.5rem;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      margin: 1.5rem 0;
+      text-align: center;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 3px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-right: 0.5rem;
+    }
+    .badge-agent { background: var(--accent-light); color: var(--accent-hover); }
+    .badge-human { background: #E8E4E0; color: var(--text); }
+
+    /* Steps */
+    .steps { counter-reset: step; list-style: none; padding-left: 0; }
+    .steps li {
+      counter-increment: step;
+      position: relative;
+      padding-left: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      background: var(--accent);
+      color: #fff;
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    /* Back link */
+    .back-link {
+      display: inline-block;
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+      margin-bottom: 2rem;
+    }
+    .back-link:hover { color: var(--text); }
+
+    /* Footer */
+    footer {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 2rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-links { display: flex; gap: 2rem; list-style: none; }
+    .footer-links a { font-size: 0.85rem; color: var(--text-tertiary); }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 0.8rem; color: var(--text-tertiary); }
+
+    @media (max-width: 768px) {
+      html { font-size: 16px; }
+      nav { padding: 1.5rem 1.25rem 0; }
+      .nav-links { gap: 1.25rem; }
+      .article-header { padding: 2.5rem 1.25rem 0; }
+      .article-header h1 { font-size: 2rem; }
+      .article-body { padding: 0 1.25rem; }
+      .divider { padding: 0 1.25rem; }
+      .feature-grid { grid-template-columns: 1fr; }
+      footer {
+        flex-direction: column; gap: 1rem;
+        padding: 2rem 1.25rem 3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-name">Alex Yao</a>
+    <ul class="nav-links">
+      <li><a href="/#desk">Building</a></li>
+      <li><a href="/guides/">Guides</a></li>
+      <li><a href="/#work-with-me">Work with me</a></li>
+    </ul>
+  </nav>
+
+  <div class="article-header">
+    <a href="/guides/" class="back-link">&larr; All guides</a>
+    <div class="article-meta">
+      <span class="article-tag">OpenClaw</span>
+      <span class="article-date">March 2026</span>
+    </div>
+    <h1>Automate Meeting Follow-Up with Granola + OpenClaw</h1>
+    <p class="subtitle">Wire Granola meeting notes directly into your OpenClaw agent. Every meeting gets transcribed, summarized, and turned into action items automatically.</p>
+  </div>
+
+  <div class="divider"><hr></div>
+
+  <div class="article-body">
+
+    <div class="feature-grid">
+      <div class="feature-card"><strong>&#127897;&#65039; Auto-Transcription</strong><span>Granola records and transcribes every meeting on Mac</span></div>
+      <div class="feature-card"><strong>&#9889; Real-Time Capture</strong><span>Cache watcher fires webhooks the moment a meeting ends</span></div>
+      <div class="feature-card"><strong>&#128193; Project Routing</strong><span>AI classifies each meeting to the right project automatically</span></div>
+      <div class="feature-card"><strong>&#9989; Action Items</strong><span>Structured Telegram summary with action items in under 3 minutes</span></div>
+    </div>
+
+    <p>Every meeting generates action items. Most of them die in the gap between &#8220;we should do that&#8221; and actually doing it.</p>
+
+    <p>I fixed this by wiring Granola (AI meeting notes) directly into my OpenClaw agent. Now every meeting I take gets automatically transcribed, summarized, routed to the right project, and turned into tracked action items. No manual step. No copy-paste. No &#8220;let me review my notes later.&#8221;</p>
+
+    <p>Here&#8217;s the full pipeline.</p>
+
+    <h2>The Problem</h2>
+
+    <p>I run multiple projects with different collaborators. A typical week has 6&#8211;8 meetings across 3&#8211;4 projects. Before this setup:</p>
+
+    <ul>
+      <li>Meeting notes sat in Granola unread</li>
+      <li>Action items lived in my head (or didn&#8217;t)</li>
+      <li>Project context never got updated</li>
+      <li>I&#8217;d show up to the next meeting having forgotten half of what we decided</li>
+    </ul>
+
+    <p>The real cost isn&#8217;t the meetings. It&#8217;s the knowledge that evaporates between them.</p>
+
+    <h2>Architecture</h2>
+
+    <div class="diagram">Granola (Mac) &#8594; Cache Watcher Daemon &#8594; Webhook &#8594; VPS Receiver &#8594; Cron Processor &#8594; Telegram Summary</div>
+
+    <p>Five components:</p>
+
+    <ol>
+      <li><strong>Granola</strong> records and transcribes meetings on Mac</li>
+      <li><strong>Cache watcher daemon</strong> on Mac detects new meetings in Granola&#8217;s local cache</li>
+      <li><strong>Webhook receiver</strong> on VPS accepts the meeting payload</li>
+      <li><strong>Cron processor</strong> classifies and summarizes every 3 minutes</li>
+      <li><strong>Telegram delivery</strong> sends a structured summary with action items</li>
+    </ol>
+
+    <div class="callout">
+      <div class="callout-title">The trick</div>
+      <p>Granola doesn&#8217;t have native webhook support (it&#8217;s on their roadmap). So we watch Granola&#8217;s local cache file for changes and fire our own webhooks. Credit to <a href="https://github.com/owengretzinger/granola-webhook">owengretzinger/granola-webhook</a> for the original idea.</p>
+    </div>
+
+    <p>Total setup time: ~30 minutes. Cost: $0. Granola&#8217;s free tier only keeps 14 days of meeting history, but it doesn&#8217;t matter &#8212; our cache watcher captures everything in real-time and stores it permanently on the VPS. You get unlimited meeting history without paying for a Granola subscription.</p>
+
+    <h2>Step 1: The Cache Watcher (Mac Side)</h2>
+
+    <p>Granola stores meeting data in a local cache file at:</p>
+
+    <pre><code>~/Library/Application Support/Granola/cache-v4.json</code></pre>
+
+    <p>This file gets updated whenever a meeting ends. A small daemon watches it for changes and sends the new meeting data to your VPS.</p>
+
+    <p>The daemon runs as a macOS launchd agent (<code>com.granola.webhook</code>), which means it starts on login and auto-restarts if it crashes.</p>
+
+    <div class="callout">
+      <div class="callout-title">Key details about the cache</div>
+      <ul>
+        <li>Contains full meeting documents (title, attendees, notes)</li>
+        <li>Also contains transcripts with timestamps and speaker identification</li>
+        <li>Only keeps ~5 recent transcripts locally (Granola purges older ones from cache to save disk)</li>
+        <li>This means the daemon needs to catch transcripts in real-time while they&#8217;re still in cache</li>
+      </ul>
+    </div>
+
+    <p>The daemon compares document IDs on each cache change, and when it finds a new one, it sends the full payload (document + transcript if available) to the VPS webhook endpoint.</p>
+
+    <h3>Launchd Setup</h3>
+
+    <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
+&lt;plist version="1.0"&gt;
+&lt;dict&gt;
+    &lt;key&gt;Label&lt;/key&gt;
+    &lt;string&gt;com.granola.webhook&lt;/string&gt;
+    &lt;key&gt;ProgramArguments&lt;/key&gt;
+    &lt;array&gt;
+        &lt;string&gt;/usr/local/bin/node&lt;/string&gt;
+        &lt;string&gt;/path/to/granola-webhook-daemon.js&lt;/string&gt;
+    &lt;/array&gt;
+    &lt;key&gt;RunAtLoad&lt;/key&gt;
+    &lt;true/&gt;
+    &lt;key&gt;KeepAlive&lt;/key&gt;
+    &lt;true/&gt;
+    &lt;key&gt;StandardOutPath&lt;/key&gt;
+    &lt;string&gt;/tmp/granola-webhook.log&lt;/string&gt;
+    &lt;key&gt;StandardErrorPath&lt;/key&gt;
+    &lt;string&gt;/tmp/granola-webhook.log&lt;/string&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;</code></pre>
+
+    <p>Save to <code>~/Library/LaunchAgents/com.granola.webhook.plist</code> and load:</p>
+
+    <pre><code>launchctl load ~/Library/LaunchAgents/com.granola.webhook.plist</code></pre>
+
+    <p>Check status: <code>launchctl list com.granola.webhook</code></p>
+
+    <h2>Step 2: Webhook Receiver (VPS Side)</h2>
+
+    <p>A lightweight Node.js server that accepts the meeting payload from Mac.</p>
+
+    <pre><code>const http = require('http');
+const fs = require('fs');
+const path = require('path');
+
+const PORT = 8790;
+const TOKEN = 'your-secret-token-here';
+const DATA_DIR = path.join(process.env.HOME, 'clawd/data/granola-webhooks');
+
+fs.mkdirSync(DATA_DIR, { recursive: true });
+
+const server = http.createServer((req, res) => {
+  if (req.method !== 'POST' || req.url !== '/webhook') {
+    res.writeHead(404);
+    return res.end('Not found');
+  }
+
+  const auth = req.headers.authorization || '';
+  if (auth !== `Bearer ${TOKEN}`) {
+    res.writeHead(401);
+    return res.end('Unauthorized');
+  }
+
+  let body = '';
+  req.on('data', chunk => body += chunk);
+  req.on('end', () => {
+    try {
+      const data = JSON.parse(body);
+      const title = data?.data?.title || 'untitled';
+      const slug = title.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .slice(0, 50);
+      const ts = new Date().toISOString()
+        .replace(/[:.]/g, '-')
+        .slice(0, 19);
+      const filename = `${ts}-${slug}.json`;
+
+      fs.writeFileSync(
+        path.join(DATA_DIR, filename),
+        JSON.stringify(data, null, 2)
+      );
+
+      const pendingDir = path.join(DATA_DIR, '.pending');
+      fs.mkdirSync(pendingDir, { recursive: true });
+      fs.writeFileSync(path.join(pendingDir, filename), '');
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end('{"status":"ok"}');
+    } catch (e) {
+      res.writeHead(400);
+      res.end('Bad request');
+    }
+  });
+});
+
+server.listen(PORT, () => {
+  console.log(`Granola webhook receiver on port ${PORT}`);
+});</code></pre>
+
+    <div class="callout">
+      <div class="callout-title">Security note</div>
+      <p>Bind this to your Tailscale IP so only devices on your private network can reach it. No public internet exposure.</p>
+    </div>
+
+    <p>Run as a systemd service:</p>
+
+    <pre><code># /etc/systemd/system/granola-webhook.service
+[Unit]
+Description=Granola Webhook Receiver
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/node /root/clawd/scripts/granola-webhook-server.js
+Restart=always
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+
+    <h2>Step 3: The Processor (OpenClaw Cron)</h2>
+
+    <p>An OpenClaw cron job checks for unprocessed meetings every 3 minutes.</p>
+
+    <pre><code>openclaw cron add \
+  --name "granola-processor" \
+  --every "3m" \
+  --model "sonnet" \
+  --session isolated \
+  --message 'Check ~/clawd/data/granola-webhooks/.pending/ for unprocessed meetings.
+  If empty, reply NO_REPLY.
+  If files exist, for each one:
+  1) Read the matching JSON
+  2) Extract title, attendees, transcript, notes
+  3) Classify project based on attendees and content
+  4) Summarize key discussion points from transcript
+  5) Send a Telegram summary with: title, attendees, bullet summary, action items
+  6) Delete the .pending marker file'</code></pre>
+
+    <p>When idle: instant <code>NO_REPLY</code>, minimal token cost. When a meeting lands: reads the full transcript and produces a structured summary.</p>
+
+    <h3>Project Classification</h3>
+
+    <p>The processor routes meetings automatically based on:</p>
+
+    <ul>
+      <li><strong>Attendee names</strong> &#8212; e.g., your co-founder = ads platform, your collaborator = curriculum project</li>
+      <li><strong>Content keywords</strong> &#8212; e.g., &#8220;curriculum&#8221; = education project, &#8220;dashboard&#8221; = ads platform</li>
+      <li><strong>Meeting title</strong> patterns</li>
+    </ul>
+
+    <p>No manual tagging. The summary lands in the right context.</p>
+
+    <h2>Step 4: What You Get</h2>
+
+    <p>Within 3 minutes of ending a meeting, a Telegram message arrives:</p>
+
+    <pre><code>Meeting: Weekly Team Planning
+Attendees: You, Collaborator A, Collaborator B
+Date: Recent date
+
+Key Points:
+- Module structure being reorganized into weekly format
+- Newsletter subscriber count growing steadily
+- First paid cohort launching soon
+
+Action Items:
+- You: Promote on LinkedIn once the community link is live
+- Collaborator A: Convert L1-L3 handouts to Gamma slides
+- Collaborator B: Draft marketing email for 40K list
+
+Project: community-project</code></pre>
+
+    <h2>Why Not Zapier?</h2>
+
+    <p>My first version used Zapier to send Granola notes to Google Drive, then an OpenClaw cron to check Drive for new files. It worked but:</p>
+
+    <ul>
+      <li>Zapier&#8217;s free tier ran out fast &#8212; this would cost $20+/mo to maintain</li>
+      <li>Extra storage layer (Google Drive)</li>
+      <li>Slower (Zapier polling + Drive API)</li>
+      <li>Missed transcripts (Zapier only got the notes, not the full transcript)</li>
+    </ul>
+
+    <p>The cache watcher approach is direct: Mac &#8594; VPS, no middleman. Zero ongoing cost. And you get the full transcript, not just the AI-generated notes.</p>
+
+    <h2>Taking It Further</h2>
+
+    <h3>Task creation</h3>
+    <p>Action items can automatically become tracked tasks in your task database. Each action item gets the right project tag and priority.</p>
+
+    <h3>Meeting prep</h3>
+    <p>Before your next meeting with the same people, pull the last meeting summary and surface unfinished action items. &#8220;Last time you agreed to X. Did that happen?&#8221;</p>
+
+    <h3>Pattern detection</h3>
+    <p>After a few weeks of data, notice patterns. &#8220;You&#8217;ve discussed pricing in 4 of the last 5 meetings with your co-founder but haven&#8217;t finalized it.&#8221;</p>
+
+    <h3>Backfilling old meetings</h3>
+    <p>The cache only keeps ~5 recent transcripts. To get older transcripts, you&#8217;d need Granola&#8217;s Enterprise API (not yet available) or catch them in real-time going forward. The key lesson: set this up before you need it.</p>
+
+    <h2>The Full Stack</h2>
+
+    <table>
+      <tr><th>Component</th><th>Tool</th><th>Cost</th></tr>
+      <tr><td>Meeting recording + transcription</td><td>Granola (Mac)</td><td>Free (cache watcher bypasses 14-day limit)</td></tr>
+      <tr><td>Cache watcher daemon</td><td>Node.js + launchd (Mac)</td><td>$0</td></tr>
+      <tr><td>Webhook receiver</td><td>Node.js on VPS</td><td>$0</td></tr>
+      <tr><td>AI processing</td><td>OpenClaw + Claude</td><td>Part of existing usage</td></tr>
+      <tr><td>Delivery</td><td>Telegram</td><td>Free</td></tr>
+    </table>
+
+    <h2>Why This Works</h2>
+
+    <p>Zero manual steps. You don&#8217;t need to:</p>
+
+    <ul>
+      <li>Open Granola after the meeting</li>
+      <li>Copy notes somewhere</li>
+      <li>Create action items manually</li>
+      <li>Update project files</li>
+      <li>Brief yourself before the next meeting</li>
+    </ul>
+
+    <p>The gap between &#8220;meeting ended&#8221; and &#8220;everything is tracked&#8221; is 3 minutes.</p>
+
+    <p>Most productivity tools fail because they add a step. This removes steps. Your meetings become self-documenting.</p>
+
+    <div class="callout" style="margin-top: 3rem;">
+      <div class="callout-title">Want to build systems like this?</div>
+      <p>I teach people how to build AI automation workflows like this in my paid community. If you want to set up your own agent systems, <a href="https://www.skool.com/agent-j-plus">check it out</a>.</p>
+    </div>
+
+  </div>
+  </div>
+
+  <div class="divider"><hr></div>
+
+  <footer>
+    <ul class="footer-links">
+      <li><a href="https://linkedin.com/in/thealexyao">LinkedIn</a></li>
+      <li><a href="https://x.com/TheAlexYao">X / Twitter</a></li>
+      <li><a href="https://www.skool.com/agent-j">Agent-J Free</a></li>
+      <li><a href="https://www.skool.com/agent-j-plus">Agent-J+</a></li>
+      <li><a href="https://cal.com/alexyao">Book a call</a></li>
+      <li><a href="mailto:alex@alexyao.me">Email</a></li>
+    </ul>
+    <span class="footer-copy">&copy; 2026 Alex Yao</span>
+  </footer>
+
+  <script>
+    function copyText(id, btn) {
+      const el = document.getElementById(id);
+      navigator.clipboard.writeText(el.textContent);
+      btn.textContent = '✅ Copied';
+      setTimeout(() => btn.textContent = '📋 Copy Message', 2000);
+    }
+  </script>
+
+</body>
+</html>
