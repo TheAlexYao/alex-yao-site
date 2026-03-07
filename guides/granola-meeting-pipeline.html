@@ -394,6 +394,50 @@
       <div class="feature-card"><strong>&#9989; Action Items</strong><span>Structured Telegram summary with action items in under 3 minutes</span></div>
     </div>
 
+    <div class="callout">
+      <div class="callout-title">What you need</div>
+      <p>A Mac running <a href="https://granola.ai">Granola</a>, a VPS or always-on machine running <a href="https://github.com/openclaw/openclaw">OpenClaw</a>, <a href="https://tailscale.com">Tailscale</a> on both, and Node.js installed on both machines.</p>
+    </div>
+
+    <h2><span class="badge badge-agent">&#129302; Agent</span> Set up automatically</h2>
+
+    <p>Send your OpenClaw agent this message. It will set up the webhook receiver, cron processor, and verify everything is running on your VPS.</p>
+
+    <div class="copy-box">
+      <div class="label">Send this to your AI agent</div>
+      <code id="agent-msg">Follow the setup instructions at https://www.alexyao.me/guides/granola-meeting-pipeline.md</code>
+      <br>
+      <button class="copy-btn" onclick="copyText('agent-msg', this)">&#128203; Copy Message</button>
+    </div>
+
+    <p>The <a href="/guides/granola-meeting-pipeline.md">.md file</a> contains step-by-step instructions your AI agent can read and execute.</p>
+
+    <div class="callout">
+      <div class="callout-title">What the agent handles (VPS side)</div>
+      <ol class="steps">
+        <li><strong>Creates</strong> the webhook receiver script (Node.js)</li>
+        <li><strong>Configures</strong> systemd service for auto-restart</li>
+        <li><strong>Sets up</strong> the OpenClaw cron processor</li>
+        <li><strong>Verifies</strong> the webhook endpoint is accepting requests</li>
+        <li><strong>Reports</strong> your Tailscale IP and webhook URL</li>
+      </ol>
+    </div>
+
+    <h2><span class="badge badge-human">&#128100; You</span> Mac side setup</h2>
+
+    <p>The cache watcher daemon runs on your Mac. Your agent can&#8217;t install this remotely (unless you have OpenClaw on your Mac too). Here&#8217;s what to set up:</p>
+
+    <ol class="steps">
+      <li><strong>Install Granola</strong> from <a href="https://granola.ai">granola.ai</a> and take a test meeting</li>
+      <li><strong>Install Tailscale</strong> on your Mac &#8212; sign in with the same account as your VPS</li>
+      <li><strong>Set up the cache watcher</strong> daemon (details in the deep dive below)</li>
+      <li><strong>Verify</strong> by ending a meeting and checking that a summary appears in Telegram</li>
+    </ol>
+
+    <div class="divider"><hr></div>
+
+    <h2>The Full Pipeline</h2>
+
     <p>Every meeting generates action items. Most of them die in the gap between &#8220;we should do that&#8221; and actually doing it.</p>
 
     <p>I fixed this by wiring Granola (AI meeting notes) directly into my OpenClaw agent. Now every meeting I take gets automatically transcribed, summarized, routed to the right project, and turned into tracked action items. No manual step. No copy-paste. No &#8220;let me review my notes later.&#8221;</p>
@@ -674,6 +718,28 @@ Project: community-project</code></pre>
     <p>The gap between &#8220;meeting ended&#8221; and &#8220;everything is tracked&#8221; is 3 minutes.</p>
 
     <p>Most productivity tools fail because they add a step. This removes steps. Your meetings become self-documenting.</p>
+
+    <h2>Troubleshooting</h2>
+
+    <table>
+      <tr><th>Problem</th><th>Fix</th></tr>
+      <tr><td>Webhook not firing after meetings</td><td>Check cache watcher is running: <code>launchctl list com.granola.webhook</code></td></tr>
+      <tr><td>Meetings not appearing on VPS</td><td>Verify Tailscale connectivity: <code>ping [VPS-TAILSCALE-IP]</code> from Mac</td></tr>
+      <tr><td>Cron not processing</td><td>Check for .pending files: <code>ls ~/clawd/data/granola-webhooks/.pending/</code></td></tr>
+      <tr><td>No Telegram summary</td><td>Check OpenClaw cron is registered: <code>openclaw cron list</code></td></tr>
+      <tr><td>Transcript missing from summary</td><td>Granola purges old transcripts from cache. The daemon must catch them in real-time.</td></tr>
+      <tr><td>Webhook receiver won&#8217;t start</td><td>Check port: <code>lsof -i :8790</code>. Check logs: <code>journalctl -u granola-webhook</code></td></tr>
+    </table>
+
+    <h2>Resources</h2>
+
+    <table>
+      <tr><th>File</th><th>Description</th></tr>
+      <tr><td><a href="/guides/granola-meeting-pipeline.md">Setup instructions (.md)</a></td><td>AI-readable instructions your agent can fetch and execute</td></tr>
+      <tr><td><a href="https://github.com/owengretzinger/granola-webhook">granola-webhook</a></td><td>Original cache watcher concept by Owen Gretzinger</td></tr>
+      <tr><td><a href="https://granola.ai">Granola</a></td><td>AI meeting notes for Mac</td></tr>
+      <tr><td><a href="https://github.com/openclaw/openclaw">OpenClaw</a></td><td>Open-source personal AI agent framework</td></tr>
+    </table>
 
     <div class="callout" style="margin-top: 3rem;">
       <div class="callout-title">Want to build systems like this?</div>
