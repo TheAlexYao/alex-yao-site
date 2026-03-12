@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How I secure my VPS every night with AI agents - Alex Yao</title>
+  <meta name="description" content="A nightly cron job that audits firewall, SSH, open ports, Docker, and failed logins. If something's wrong, the agent fixes it. Here's the exact setup.">
+  <meta name="author" content="Alex Yao">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/favicon-src.png" type="image/png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="canonical" href="https://www.alexyao.me/guides/nightly-vps-security-audit">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="How I secure my VPS every night with AI agents">
+  <meta property="og:description" content="A nightly cron job that audits firewall, SSH, open ports, Docker, and failed logins. If something's wrong, the agent fixes it.">
+  <meta property="og:url" content="https://www.alexyao.me/guides/nightly-vps-security-audit">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F6F1EB;
+      --bg-warm: #EDE7DF;
+      --bg-card: #FDFBF8;
+      --text: #2D2926;
+      --text-secondary: #6B6560;
+      --text-tertiary: #9C9590;
+      --accent: #C2791D;
+      --accent-hover: #A8671A;
+      --accent-light: #F0DCC4;
+      --border: #DDD6CD;
+      --serif: 'Instrument Serif', 'Georgia', serif;
+      --sans: 'Inter', -apple-system, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 18px; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: var(--accent-light); color: var(--text); }
+    a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--accent-hover); }
+
+    nav {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 2rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-name {
+      font-family: var(--serif);
+      font-size: 1.4rem;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .article-header {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 4rem 2rem 0;
+    }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .article-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 0.2rem 0.6rem;
+      border-radius: 3px;
+    }
+    .article-date {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+    }
+    .article-header h1 {
+      font-family: var(--serif);
+      font-size: 2.8rem;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .article-header .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .divider {
+      max-width: 740px;
+      margin: 3rem auto;
+      padding: 0 2rem;
+    }
+    .divider hr { border: none; border-top: 1px solid var(--border); }
+
+    .article-body {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+    .article-body h2 {
+      font-family: var(--serif);
+      font-size: 1.8rem;
+      font-weight: 400;
+      margin-top: 3rem;
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+    }
+    .article-body h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+    }
+    .article-body p {
+      margin-bottom: 1.2rem;
+      line-height: 1.75;
+    }
+    .article-body ul, .article-body ol {
+      margin-bottom: 1.2rem;
+      padding-left: 1.5rem;
+    }
+    .article-body li {
+      margin-bottom: 0.5rem;
+      line-height: 1.65;
+    }
+    .article-body pre {
+      background: var(--text);
+      color: #E8E4E0;
+      padding: 1.2rem 1.5rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    .article-body code {
+      background: var(--bg-warm);
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      font-size: 0.88rem;
+    }
+    .article-body pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+    .article-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+    }
+    .article-body th, .article-body td {
+      text-align: left;
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body th {
+      font-weight: 600;
+      background: var(--bg-warm);
+      font-size: 0.8rem;
+      letter-spacing: 0.02em;
+    }
+
+    .callout {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 6px 6px 0;
+      margin: 1.5rem 0;
+    }
+    .callout-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
+    .callout p { margin-bottom: 0; }
+
+    .callout-warning {
+      border-left-color: #C0392B;
+    }
+    .callout-warning .callout-title {
+      color: #C0392B;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.25rem;
+    }
+    .feature-card strong {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-size: 0.9rem;
+    }
+    .feature-card span {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .copy-box {
+      background: var(--text);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      text-align: center;
+    }
+    .copy-box .label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-tertiary);
+      margin-bottom: 0.75rem;
+    }
+    .copy-box code {
+      background: #3D3835;
+      color: #E8E4E0;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      display: inline-block;
+      margin-bottom: 1rem;
+      max-width: 100%;
+      word-break: break-word;
+      text-align: left;
+    }
+    .copy-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .copy-btn:hover { background: var(--accent-hover); }
+
+    .diagram {
+      background: var(--text);
+      color: #E8E4E0;
+      padding: 1.5rem;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      margin: 1.5rem 0;
+      text-align: center;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .back-link {
+      display: inline-block;
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+      margin-bottom: 2rem;
+    }
+    .back-link:hover { color: var(--text); }
+
+    .credit {
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+      font-style: italic;
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: var(--bg-warm);
+      border-radius: 6px;
+    }
+
+    footer {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 2rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-links { display: flex; gap: 2rem; list-style: none; }
+    .footer-links a { font-size: 0.85rem; color: var(--text-tertiary); }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 0.8rem; color: var(--text-tertiary); }
+
+    @media (max-width: 768px) {
+      html { font-size: 16px; }
+      nav { padding: 1.5rem 1.25rem 0; }
+      .nav-links { gap: 1.25rem; }
+      .article-header { padding: 2.5rem 1.25rem 0; }
+      .article-header h1 { font-size: 2rem; }
+      .article-body { padding: 0 1.25rem; }
+      .divider { padding: 0 1.25rem; }
+      .feature-grid { grid-template-columns: 1fr; }
+      footer {
+        flex-direction: column; gap: 1rem;
+        padding: 2rem 1.25rem 3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-name">Alex Yao</a>
+    <ul class="nav-links">
+      <li><a href="/#desk">Building</a></li>
+      <li><a href="/guides/">Guides</a></li>
+      <li><a href="/#work-with-me">Work with me</a></li>
+    </ul>
+  </nav>
+
+  <div class="article-header">
+    <a href="/guides/" class="back-link">&larr; All guides</a>
+    <div class="article-meta">
+      <span class="article-tag">Security</span>
+      <span class="article-date">March 2026</span>
+    </div>
+    <h1>How I secure my VPS every night with AI agents</h1>
+    <p class="subtitle">A cron job that audits my firewall, SSH config, open ports, Docker containers, and failed logins every night at 11pm. If something's wrong, the agent fixes it automatically.</p>
+  </div>
+
+  <div class="divider"><hr></div>
+
+  <div class="article-body">
+
+    <p>I run AI agents on a VPS 24/7. They manage my workflows, process data, and talk to me over Telegram. That VPS is always on, always connected, and always a target.</p>
+
+    <p>So every night at 11pm, another agent wakes up and runs a full security audit. If everything passes, it logs "security audit passed" and goes back to sleep. If something fails, it explains the issue and fixes it immediately.</p>
+
+    <p>No dashboards to check. No alerts to configure. Just an agent doing the boring work every single night.</p>
+
+    <div class="feature-grid">
+      <div class="feature-card"><strong>🔥 Firewall</strong><span>UFW active and configured correctly</span></div>
+      <div class="feature-card"><strong>🚫 Fail2Ban</strong><span>How many IPs got banned in 24h</span></div>
+      <div class="feature-card"><strong>🔑 SSH Config</strong><span>Password auth disabled, keys only</span></div>
+      <div class="feature-card"><strong>🔍 Open Ports</strong><span>Nothing unexpected listening</span></div>
+      <div class="feature-card"><strong>🐳 Docker</strong><span>No rogue containers running</span></div>
+      <div class="feature-card"><strong>💾 Disk Usage</strong><span>Under 80% capacity</span></div>
+    </div>
+
+    <h2>The setup</h2>
+
+    <p>I use <a href="https://github.com/NousResearch/hermes-agent">Hermes</a> for this, not <a href="https://github.com/openclaw/openclaw">OpenClaw</a>. Hermes is an open-source AI agent built by <a href="https://nousresearch.com">Nous Research</a> with a built-in cron scheduler and learning loop. It lives on the same VPS as my other agents but handles this specific job.</p>
+
+    <p>Why a separate agent? Same reason you don't use your daily driver for security. Separation of concerns. Hermes runs this audit independently. If my main agent goes down, the security checks still run.</p>
+
+    <h2>The prompt</h2>
+
+    <p>This is the exact cron prompt. Nothing fancy. Plain language instructions that the agent executes with shell access.</p>
+
+    <pre><code>Run a security audit every night at 11pm.
+
+Check:
+
+1. ufw status (firewall active?)
+2. fail2ban status (how many IPs banned?)
+3. SSH config (password auth disabled?)
+4. open ports (anything unexpected listening?)
+5. docker containers (any rogue containers?)
+6. disk usage (under 80%?)
+7. failed login attempts last 24h
+
+If everything passes, say "security audit passed."
+
+If anything fails, explain the issue and fix it immediately.</code></pre>
+
+    <p class="credit">Prompt originally shared by <a href="https://x.com/johann_sath/status/2031869021289922667">@johann_sath</a> on X.</p>
+
+    <h2>What happens behind the scenes</h2>
+
+    <p>When the cron fires, Hermes runs each check as a shell command and evaluates the output. Here's what it actually executes:</p>
+
+    <table>
+      <tr><th>Check</th><th>Command</th><th>Pass condition</th></tr>
+      <tr><td>Firewall</td><td><code>ufw status</code></td><td>Status: active</td></tr>
+      <tr><td>Fail2Ban</td><td><code>fail2ban-client status sshd</code></td><td>Running, reports ban count</td></tr>
+      <tr><td>SSH</td><td><code>sshd -T</code></td><td>passwordauthentication no</td></tr>
+      <tr><td>Open ports</td><td><code>ss -tlnp</code></td><td>Only expected ports (22, 80, 443, etc.)</td></tr>
+      <tr><td>Docker</td><td><code>docker ps</code></td><td>Only known containers running</td></tr>
+      <tr><td>Disk</td><td><code>df -h /</code></td><td>Usage under 80%</td></tr>
+      <tr><td>Failed logins</td><td><code>journalctl -u sshd --since "24h ago"</code></td><td>No successful unauthorized logins</td></tr>
+    </table>
+
+    <p>The agent doesn't just check. If it finds password auth enabled on SSH, it edits the config and restarts sshd. If disk is over 80%, it finds and cleans up the biggest offenders (old logs, docker images, temp files). If there's a rogue container, it stops it and alerts me.</p>
+
+    <div class="callout callout-warning">
+      <div class="callout-title">A note on auto-remediation</div>
+      <p>Giving an AI agent permission to fix security issues means trusting it with root access. I'm comfortable with this because (1) the checks are well-scoped, (2) the fixes are standard sysadmin procedures, and (3) I review the logs. If you're not comfortable with auto-fix, change the prompt to "explain the issue and suggest a fix" instead.</p>
+    </div>
+
+    <h2>Why Hermes</h2>
+
+    <p><a href="https://github.com/NousResearch/hermes-agent">Hermes</a> is open-source, runs on any model (OpenRouter, OpenAI, local), and has a built-in cron scheduler that delivers results to Telegram, Discord, or Slack. The relevant features for this use case:</p>
+
+    <ul>
+      <li><strong>Cron scheduling</strong> in natural language. No crontab syntax. Just "every night at 11pm."</li>
+      <li><strong>Shell access</strong> with command approval controls. You decide what it can run without asking.</li>
+      <li><strong>Platform delivery.</strong> Results go straight to Telegram. I see a message every morning: either "passed" or a detailed report of what it found and fixed.</li>
+      <li><strong>Skill memory.</strong> If it learns a new pattern (e.g., a specific log rotation command for your setup), it remembers it for next time.</li>
+    </ul>
+
+    <p>You could do this with OpenClaw, cron + a bash script, or any agent framework with shell access. Hermes just happens to be what I use for this job because it runs independently from my main agent stack.</p>
+
+    <h2>Setting it up yourself</h2>
+
+    <h3>1. Install Hermes</h3>
+
+    <pre><code>curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+source ~/.bashrc
+hermes setup</code></pre>
+
+    <h3>2. Configure your model</h3>
+
+    <pre><code>hermes model</code></pre>
+
+    <p>Pick any provider. OpenRouter gives you access to 200+ models. For security audits, you don't need a frontier model. Anything that can read command output and follow instructions works.</p>
+
+    <h3>3. Set up the cron</h3>
+
+    <p>Open Hermes and paste the prompt from above. Tell it to run as a cron. It handles the scheduling natively.</p>
+
+    <h3>4. Connect Telegram (optional)</h3>
+
+    <pre><code>hermes gateway</code></pre>
+
+    <p>Follow the setup to connect a Telegram bot. Now your audit results land in your DMs every morning.</p>
+
+    <div class="callout">
+      <div class="callout-title">The baseline matters</div>
+      <p>Before running this, make sure your VPS has the basics: UFW installed and enabled, fail2ban configured, SSH key-only auth, and unattended-upgrades for automatic security patches. The audit checks these are still in place. It doesn't set them up from scratch.</p>
+    </div>
+
+    <h2>What I've caught</h2>
+
+    <p>In the months I've been running this:</p>
+
+    <ul>
+      <li>Disk hit 83% from accumulated Docker build layers. Agent cleaned up dangling images and old build cache.</li>
+      <li>A test container I forgot about was still running, exposing a debug port. Agent stopped it.</li>
+      <li>fail2ban had banned 47 IPs in one 24-hour period after a brute-force wave. No breaches, but good to know the volume.</li>
+    </ul>
+
+    <p>None of these were emergencies. All of them were things I wouldn't have noticed until they became emergencies.</p>
+
+    <h2>The pattern</h2>
+
+    <p>This isn't really about security. It's about using AI agents for the maintenance work that humans forget, skip, or procrastinate on. Security audits. Log rotation. Certificate renewal checks. Dependency updates. Backup verification.</p>
+
+    <p>The work that's important but never urgent, until it is.</p>
+
+    <p>Set up an agent. Give it the checklist. Let it run every night. Read the results over coffee.</p>
+
+    <div class="diagram">┌──────────────┐     11pm daily     ┌─────────────────┐
+│              │ ──────────────────&gt; │  Security Audit  │
+│   Hermes     │                     │  7 checks        │
+│   (cron)     │ &lt;────────────────── │  auto-remediate  │
+│              │     results         │                  │
+└──────┬───────┘                     └─────────────────┘
+       │
+       │ Telegram
+       ▼
+┌──────────────┐
+│  Your phone  │
+│  ☕ morning   │
+└──────────────┘</div>
+
+    <div class="callout" style="margin-top: 3rem;">
+      <div class="callout-title">About this guide</div>
+      <p>Built by <a href="/">Alex Yao</a>. I teach professionals how to build AI agent systems that do real work. <a href="https://www.skool.com/agent-j-plus">Join Agent-J+</a> if you want to learn how.</p>
+    </div>
+
+  </div>
+
+  <div class="divider"><hr></div>
+
+  <footer>
+    <ul class="footer-links">
+      <li><a href="https://linkedin.com/in/thealexyao">LinkedIn</a></li>
+      <li><a href="https://x.com/TheAlexYao">X / Twitter</a></li>
+      <li><a href="https://www.skool.com/agent-j">Agent-J Free</a></li>
+      <li><a href="https://www.skool.com/agent-j-plus">Agent-J+</a></li>
+      <li><a href="https://cal.com/alexyao">Book a call</a></li>
+      <li><a href="mailto:alex@alexyao.me">Email</a></li>
+    </ul>
+    <span class="footer-copy">&copy; 2026 Alex Yao</span>
+  </footer>
+
+</body>
+</html>
