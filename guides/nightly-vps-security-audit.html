@@ -376,9 +376,9 @@
 
     <h2>The setup</h2>
 
-    <p>I use <a href="https://github.com/NousResearch/hermes-agent">Hermes</a> for this, not <a href="https://github.com/openclaw/openclaw">OpenClaw</a>. Hermes is an open-source AI agent built by <a href="https://nousresearch.com">Nous Research</a> with a built-in cron scheduler and learning loop. It lives on the same VPS as my other agents but handles this specific job.</p>
+    <p>I use <a href="https://github.com/NousResearch/hermes-agent">Hermes</a> for this, not <a href="https://github.com/openclaw/openclaw">OpenClaw</a>. Hermes is an open-source AI agent built by <a href="https://nousresearch.com">Nous Research</a>, running GPT-5.4. It's security-conscious by design and particularly good at agentic crons. Built-in cron scheduler, learning loop, and a paranoid default posture that's exactly what you want for this kind of work.</p>
 
-    <p>Why a separate agent? Same reason you don't use your daily driver for security. Separation of concerns. Hermes runs this audit independently. If my main agent goes down, the security checks still run.</p>
+    <p>Why a separate agent? Same reason you don't use your daily driver for security. Separation of concerns. Hermes runs this audit independently on the same VPS. If my main agent goes down, the security checks still run.</p>
 
     <h2>The prompt</h2>
 
@@ -449,7 +449,7 @@ hermes setup</code></pre>
 
     <pre><code>hermes model</code></pre>
 
-    <p>Pick any provider. OpenRouter gives you access to 200+ models. For security audits, you don't need a frontier model. Anything that can read command output and follow instructions works.</p>
+    <p>I run it on GPT-5.4 via OpenRouter. For security audits you want a model that's thorough and follows instructions precisely. 5.4 is good at this.</p>
 
     <h3>3. Set up the cron</h3>
 
