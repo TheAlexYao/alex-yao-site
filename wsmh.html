@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Water Street Music Hall — AI Workflow Discovery</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F6F1EB;
+      --bg-warm: #EDE7DF;
+      --bg-card: #FDFBF8;
+      --text: #2D2926;
+      --text-secondary: #6B6560;
+      --text-tertiary: #9C9590;
+      --accent: #C2791D;
+      --accent-hover: #A8671A;
+      --accent-light: #F0DCC4;
+      --border: #DDD6CD;
+      --serif: 'Instrument Serif', 'Georgia', serif;
+      --sans: 'Inter', -apple-system, sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 18px; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: var(--accent-light); color: var(--text); }
+
+    /* Password gate */
+    #gate {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .gate-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2.5rem;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    .gate-box h1 {
+      font-family: var(--serif);
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .gate-box p {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+    .gate-box input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      background: var(--bg);
+      color: var(--text);
+      margin-bottom: 1rem;
+      outline: none;
+    }
+    .gate-box input:focus {
+      border-color: var(--accent);
+    }
+    .gate-box button {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .gate-box button:hover { background: var(--accent-hover); }
+    .gate-error {
+      color: #c0392b;
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    /* Content */
+    #content { display: none; }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 6rem;
+    }
+    h1 {
+      font-family: var(--serif);
+      font-size: 2.2rem;
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+    }
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 2.5rem;
+    }
+    h2 {
+      font-family: var(--serif);
+      font-size: 1.4rem;
+      margin-top: 2.5rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    ul {
+      padding-left: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    li {
+      margin-bottom: 0.4rem;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .time-est {
+      display: inline-block;
+      background: var(--accent-light);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+    .intro-note {
+      background: var(--bg-warm);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+    }
+    .back-link:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<!-- Password Gate -->
+<div id="gate">
+  <div class="gate-box">
+    <h1>Private Document</h1>
+    <p>Enter the password to view this document.</p>
+    <form onsubmit="return checkPass()">
+      <input type="password" id="pw" placeholder="Password" autofocus>
+      <button type="submit">View Document</button>
+    </form>
+    <div class="gate-error" id="err">Incorrect password. Try again.</div>
+  </div>
+</div>
+
+<!-- Main Content (hidden until password) -->
+<div id="content">
+  <div class="container">
+    <a href="/" class="back-link">← alexyao.me</a>
+    <h1>Water Street Music Hall</h1>
+    <p class="subtitle">AI Workflow Discovery — Prep Questions</p>
+
+    <div class="intro-note">
+      These are the topics we'll cover in our discovery call. You don't need to prepare detailed answers — just skim through so you know what we'll be discussing. The goal is to understand how things work today so we can identify the highest-impact automation opportunities.
+    </div>
+
+    <!-- 1 -->
+    <div class="section-card">
+      <h2>1. The Big Picture <span class="time-est">~5 min</span></h2>
+      <ul>
+        <li>Walk me through a typical week at Water Street. What does your day-to-day look like?</li>
+        <li>How many shows/events do you run per week? Per month?</li>
+        <li>How big is the team? Who does what?</li>
+        <li>What's the split between music shows vs. comedy vs. private events?</li>
+        <li>What's the busiest season vs. slowest? How far ahead are you booking?</li>
+      </ul>
+    </div>
+
+    <!-- 2 -->
+    <div class="section-card">
+      <h2>2. Marketing & Promotion <span class="time-est">~10 min</span></h2>
+      <h3>Current State</h3>
+      <ul>
+        <li>How do you promote shows today? (Social media, email, flyers, radio, partnerships?)</li>
+        <li>Which platforms are you on? (Instagram, Facebook, TikTok, X, YouTube?)</li>
+        <li>Who creates the content? How long does it take per show?</li>
+        <li>Do you have an email list? How big? What tool?</li>
+        <li>How do you decide how much marketing push a show gets?</li>
+      </ul>
+      <h3>Pain Points</h3>
+      <ul>
+        <li>What takes the most time in marketing?</li>
+        <li>Are there shows that underperform because they didn't get enough promotion?</li>
+        <li>Do you repurpose content across platforms or create fresh for each?</li>
+        <li>How do you handle show announcements — is there a standard flow or ad hoc?</li>
+      </ul>
+    </div>
+
+    <!-- 3 -->
+    <div class="section-card">
+      <h2>3. Ticketing & Sales <span class="time-est">~5 min</span></h2>
+      <ul>
+        <li>You're on Eventbrite — happy with it, or looking to switch?</li>
+        <li>Do you track ticket sales trends? (Which shows sell fast, which need a push?)</li>
+        <li>How do you handle slow-selling shows? Any marketing playbook for that?</li>
+        <li>Do you do any dynamic pricing or early-bird discounts?</li>
+        <li>Walk-up vs. presale ratio — do you know it?</li>
+        <li>How do you handle refunds, transfers, comps?</li>
+      </ul>
+    </div>
+
+    <!-- 4 -->
+    <div class="section-card">
+      <h2>4. Artist Booking & Scheduling <span class="time-est">~5 min</span></h2>
+      <ul>
+        <li>How does booking work today? Inbound offers, outbound outreach, agents, or mix?</li>
+        <li>What tools do you use? (Email, spreadsheets, Prism.fm, etc.)</li>
+        <li>How do you evaluate whether to book an act? (Guarantees, door deals, past draw data?)</li>
+        <li>How far out are you booking? What does the pipeline look like?</li>
+        <li>How do you track holds, confirms, advances, settlements?</li>
+      </ul>
+    </div>
+
+    <!-- 5 -->
+    <div class="section-card">
+      <h2>5. Day-of-Show Operations <span class="time-est">~3 min</span></h2>
+      <ul>
+        <li>What does the day-of workflow look like? (Load-in, soundcheck, doors, show, settlement)</li>
+        <li>Do you have a standard runsheet or is it in someone's head?</li>
+        <li>How do you communicate with staff day-of? (Group text, Slack, in person?)</li>
+        <li>What goes wrong most often?</li>
+      </ul>
+    </div>
+
+    <!-- 6 -->
+    <div class="section-card">
+      <h2>6. Customer Communication <span class="time-est">~3 min</span></h2>
+      <ul>
+        <li>How do people reach you? (Phone, email, social DMs, website form?)</li>
+        <li>What are the most common questions you get?</li>
+        <li>How do you handle private event inquiries?</li>
+        <li>Do you have a FAQ or is it all manual responses?</li>
+      </ul>
+    </div>
+
+    <!-- 7 -->
+    <div class="section-card">
+      <h2>7. Bar & Food Inventory <span class="time-est">~5 min</span></h2>
+      <ul>
+        <li>How do you track bar/food inventory today? (POS reports, manual counts, spreadsheets?)</li>
+        <li>What POS system are you running?</li>
+        <li>How do you decide what to order and when? Who handles purchasing?</li>
+        <li>Do you ever run out of something during a show? How often?</li>
+        <li>Do you track waste? (Spoilage, over-pouring, expired food?)</li>
+        <li>Does ordering change based on the type of show?</li>
+        <li>How far in advance do you place orders? Lead time from distributors?</li>
+      </ul>
+    </div>
+
+    <!-- 8 -->
+    <div class="section-card">
+      <h2>8. Financial & Admin <span class="time-est">~2 min</span></h2>
+      <ul>
+        <li>How do you track revenue? (QuickBooks, spreadsheets, nothing?)</li>
+        <li>Biggest admin time sinks?</li>
+        <li>Any reporting you wish you had but don't?</li>
+      </ul>
+    </div>
+
+    <!-- 9 -->
+    <div class="section-card">
+      <h2>9. Tools & Platforms <span class="time-est">~2 min</span></h2>
+      <ul>
+        <li>Quick rundown of what you're using: ticketing, email, social, booking/calendar, accounting, team communication, website/CMS, POS/bar system, inventory/ordering</li>
+      </ul>
+    </div>
+
+    <!-- 10 -->
+    <div class="section-card">
+      <h2>10. Meetings & Time Sinks <span class="time-est">~2 min</span></h2>
+      <ul>
+        <li>What meetings happen regularly? (Staff, booking, marketing review?)</li>
+        <li>How long do they take? What's discussed?</li>
+        <li>What recurring tasks feel like they should be automated but aren't?</li>
+        <li>Where do you spend time that feels like it should be faster?</li>
+      </ul>
+    </div>
+
+    <!-- 11 -->
+    <div class="section-card">
+      <h2>11. Show Advancing & Artist Relations <span class="time-est">~5 min</span></h2>
+      <ul>
+        <li>Walk me through what happens after a show is confirmed. How do you advance it?</li>
+        <li>How do you handle technical riders? (Stage plots, sound requirements, backline needs)</li>
+        <li>What about hospitality riders? (Green room, catering, lodging, transportation)</li>
+        <li>How many emails/calls does a typical advance take? Over how many days?</li>
+        <li>Do you coordinate lodging/travel for touring artists? How?</li>
+        <li>Who handles day-of communication with the tour manager?</li>
+        <li>How do you share venue specs with incoming artists? (PDF? Website? Every time from scratch?)</li>
+      </ul>
+    </div>
+
+    <!-- 12 -->
+    <div class="section-card">
+      <h2>12. Audience Data & Fan Intelligence <span class="time-est">~5 min</span></h2>
+      <ul>
+        <li>Do you know who your audience is? Demographics, where they come from, repeat attendees?</li>
+        <li>Are you capturing emails beyond Eventbrite purchases?</li>
+        <li>Can you tell which fans like which genres? Do you segment at all?</li>
+        <li>Do you know your repeat attendee rate?</li>
+        <li>Have you ever done targeted outreach like "you saw Artist X, you'll love Artist Y"?</li>
+      </ul>
+    </div>
+
+    <!-- 13 -->
+    <div class="section-card">
+      <h2>13. Post-Show Settlement & Financials <span class="time-est">~3 min</span></h2>
+      <ul>
+        <li>How do you settle with artists after a show? (Guarantee, door deal, percentage, hybrid?)</li>
+        <li>Who does the math? What tools?</li>
+        <li>How long does settlement take after the show? Same night? Next day?</li>
+        <li>Have you ever had a dispute over settlement numbers?</li>
+        <li>Do you track revenue-per-head (ticket + bar + merch) per show?</li>
+      </ul>
+    </div>
+
+    <!-- 14 -->
+    <div class="section-card">
+      <h2>14. Content Capture & Media <span class="time-est">~3 min</span></h2>
+      <ul>
+        <li>Do you have a photographer/videographer at shows? Paid or volunteer?</li>
+        <li>What happens with show photos after the event? Where do they go?</li>
+        <li>Do artists ever share your venue on their socials? Do you coordinate that?</li>
+        <li>Do you record any shows? Live streams?</li>
+        <li>How do you handle press inquiries?</li>
+      </ul>
+    </div>
+
+    <!-- 15 -->
+    <div class="section-card">
+      <h2>15. Reputation & Reviews <span class="time-est">~2 min</span></h2>
+      <ul>
+        <li>Do you monitor Google/Yelp reviews? Who responds?</li>
+        <li>How do you handle negative reviews?</li>
+        <li>Do you actively ask attendees for reviews?</li>
+      </ul>
+    </div>
+
+    <!-- 16 -->
+    <div class="section-card">
+      <h2>16. Compliance & Licensing <span class="time-est">~2 min</span></h2>
+      <ul>
+        <li>How do you handle ASCAP/BMI/SESAC music licensing reporting?</li>
+        <li>Do you track setlists?</li>
+        <li>Any compliance headaches? (Liquor license, capacity tracking, noise ordinances?)</li>
+      </ul>
+    </div>
+
+    <!-- 17 -->
+    <div class="section-card">
+      <h2>17. Private Events & Revenue Diversification <span class="time-est">~3 min</span></h2>
+      <ul>
+        <li>Do you host private events? (Corporate, weddings, fundraisers, film screenings?)</li>
+        <li>How do inquiries come in? How fast do you respond?</li>
+        <li>What's the conversion rate from inquiry to booking?</li>
+        <li>Do you sell venue merch? Take a cut of artist merch?</li>
+        <li>Any VIP packages or premium experiences?</li>
+        <li>Any daytime revenue? (Rehearsal space, recording, workshops?)</li>
+      </ul>
+    </div>
+
+    <!-- 18 -->
+    <div class="section-card">
+      <h2>18. Competitive Landscape <span class="time-est">~2 min</span></h2>
+      <ul>
+        <li>What other venues in Rochester are you competing with for acts?</li>
+        <li>Do you ever lose bookings to other venues? Why?</li>
+        <li>How does weather affect turnout? Do you adjust plans for it?</li>
+        <li>Do local events (Bills games, festivals, conventions) impact your shows?</li>
+      </ul>
+    </div>
+
+    <!-- 19 -->
+    <div class="section-card">
+      <h2>19. Priorities <span class="time-est">~3 min</span></h2>
+      <ul>
+        <li>If you could wave a magic wand and automate one thing tomorrow, what would it be?</li>
+        <li>What would save you the most time?</li>
+        <li>What would make you the most money?</li>
+        <li>Have you tried any AI tools already? What worked, what didn't?</li>
+        <li>What's your comfort level with new tools?</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Simple client-side password gate (not security-critical, just privacy)
+  const HASH = '7554c7b3538a3b606b164e2050348869169aabdd9fd8fe5008019b49cbdfa5e8'; // sha256 of password
+
+  async function sha256(msg) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function checkPass() {
+    const pw = document.getElementById('pw').value;
+    const hash = await sha256(pw);
+    if (hash === HASH) {
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('content').style.display = 'block';
+      sessionStorage.setItem('wsmh_auth', '1');
+      return false;
+    }
+    document.getElementById('err').style.display = 'block';
+    return false;
+  }
+
+  // Auto-unlock if already authenticated in this session
+  if (sessionStorage.getItem('wsmh_auth') === '1') {
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+  }
+</script>
+
+</body>
+</html>
